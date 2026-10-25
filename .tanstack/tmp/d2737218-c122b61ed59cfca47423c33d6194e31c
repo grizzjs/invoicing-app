@@ -1,0 +1,6 @@
+import ViewDeliveryPDF from "@/features/deliveries/pages/view-delivery-pdf";
+import { createLazyFileRoute } from "@tanstack/react-router";
+
+export const Route = createLazyFileRoute("/_deliveries/$deliveryId/pdf")({
+  component: ViewDeliveryPDF,
+});

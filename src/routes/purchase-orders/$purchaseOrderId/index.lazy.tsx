@@ -1,0 +1,6 @@
+import ViewPurchaseOrderPage from "@/features/purchase-orders/pages/view-purchase-order";
+import { createLazyFileRoute } from "@tanstack/react-router";
+
+export const Route = createLazyFileRoute("/purchase-orders/$purchaseOrderId/")({
+  component: ViewPurchaseOrderPage,
+});

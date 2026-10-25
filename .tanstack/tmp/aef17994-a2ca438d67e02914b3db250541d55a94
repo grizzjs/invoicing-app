@@ -1,0 +1,6 @@
+import ListPurchaseOrdersPage from "@/features/purchase-orders/pages/list-purchase-orders";
+import { createFileRoute } from "@tanstack/react-router";
+
+export const Route = createFileRoute("/purchase-orders/index/lazy copy")({
+  component: ListPurchaseOrdersPage,
+});

@@ -1,0 +1,6 @@
+import ViewDeliveryPage from "@/features/deliveries/pages/ViewDeliveryPage";
+import { createLazyFileRoute } from "@tanstack/react-router";
+
+export const Route = createLazyFileRoute("/deliveries copy/$deliveryId")({
+  component: ViewDeliveryPage,
+});

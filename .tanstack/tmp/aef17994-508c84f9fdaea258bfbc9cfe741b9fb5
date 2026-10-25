@@ -1,0 +1,6 @@
+import ViewInvoicePDF from "@/features/invoices/pages/view-invoice-pdf";
+import { createFileRoute } from "@tanstack/react-router";
+
+export const Route = createFileRoute("/invoices_/$invoiceId/pdf/lazy copy")({
+  component: ViewInvoicePDF,
+});

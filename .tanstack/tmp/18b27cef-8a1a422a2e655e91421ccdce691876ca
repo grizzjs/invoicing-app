@@ -1,0 +1,8 @@
+import PurchaseOrderPDF from "@/features/common/pages/purchase-order-pdf";
+import { createLazyFileRoute } from "@tanstack/react-router";
+
+export const Route = createLazyFileRoute(
+  "/purchase-orders/$purchaseOrderId/$purchaseOrderId/pdf",
+)({
+  component: PurchaseOrderPDF,
+});
