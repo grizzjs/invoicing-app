@@ -26,8 +26,10 @@ export function HeaderActionsGroup({
       <div className="h-5 w-px bg-gray-300" />
       <HeaderActions>
         {isIn([Status.New], deliveryReceipt.status) && (
-          <Button variant="outline">
-            <Pencil /> Edit
+          <Button variant="outline" asChild>
+            <Link to={`edit`}>
+              <Pencil /> Edit
+            </Link>
           </Button>
         )}
 
