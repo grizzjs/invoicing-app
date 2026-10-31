@@ -13,8 +13,11 @@ export interface CreateCollectionDto {
   amount: number;
   /** Vat withheld from invoices */
   vat: number;
-  /** Notes for this collection */
-  notes: string;
+  /**
+     * Notes for this collection
+     * @nullable
+     */
+  notes?: string | null;
   /** Customer associated with the collection */
   customer: number;
   /** Invoices paid for this collection */

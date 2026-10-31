@@ -13,8 +13,11 @@ export interface CreateDeliveryReceiptDto {
   purchaseOrder: CreateDeliveryReceiptDtoPurchaseOrder;
   /** Date the delivery receipt was created */
   createDate: string;
-  /** Notes for this delivery receipt */
-  notes: string;
+  /**
+     * Notes for this delivery receipt
+     * @nullable
+     */
+  notes?: string | null;
   /** Line items of the delivery receipt */
   lineItems: CreateDeliveryReceiptLineItemDto[];
 }

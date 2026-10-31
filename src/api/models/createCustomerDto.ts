@@ -17,6 +17,9 @@ export interface CreateCustomerDto {
   email?: string;
   /** Taxpayer Identification Number of the customer */
   tin?: string;
-  /** Notes for this customer */
-  notes: string;
+  /**
+     * Notes for this customer
+     * @nullable
+     */
+  notes?: string | null;
 }

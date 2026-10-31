@@ -26,8 +26,11 @@ export interface InvoiceDto {
   amount: number;
   /** The official receipt number of the invoice */
   officialReceipt: number;
-  /** Notes for this invoice */
-  notes: string;
+  /**
+     * Notes for this invoice
+     * @nullable
+     */
+  notes: string | null;
   /** Customer associated with the invoice */
   customer: CustomerDto;
   /** Delivery receipts associated with the invoice */
