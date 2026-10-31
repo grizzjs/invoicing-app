@@ -356,6 +356,7 @@ export default function CreateCollectionPage() {
 
                       <div className="px-4 py-3 bg-white">
                         <button
+                          type="button"
                           onClick={() => {
                             setOpen(true);
                           }}
@@ -389,7 +390,7 @@ export default function CreateCollectionPage() {
             </Button>
             <form.Subscribe selector={(state) => state.isSubmitting}>
               {(isSubmitting) => (
-                <Button onClick={form.handleSubmit} disabled={isSubmitting}>
+                <Button type="submit" disabled={isSubmitting}>
                   {isSubmitting ? "Saving..." : "Save"}
                 </Button>
               )}

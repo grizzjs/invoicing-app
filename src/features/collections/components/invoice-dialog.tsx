@@ -194,7 +194,7 @@ export default function InvoiceDialog({
                 </DialogClose>
                 <form.Subscribe selector={(state) => state.isSubmitting}>
                   {(isSubmitting) => (
-                    <Button onClick={form.handleSubmit} disabled={isSubmitting}>
+                    <Button type="submit" disabled={isSubmitting}>
                       {isSubmitting ? "Saving..." : "Save"}
                     </Button>
                   )}

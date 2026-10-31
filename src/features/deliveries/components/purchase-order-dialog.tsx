@@ -178,6 +178,7 @@ export default function PurchaseOrderDialog({
                                     <field.CheckBox
                                       id={item.id}
                                       label={item.name}
+                                      getLabel={() => item.name}
                                       description={`${
                                         item.quantity -
                                         item.deliveries.reduce(
@@ -210,7 +211,7 @@ export default function PurchaseOrderDialog({
                 </DialogClose>
                 <form.Subscribe selector={(state) => state.isSubmitting}>
                   {(isSubmitting) => (
-                    <Button onClick={form.handleSubmit} disabled={isSubmitting}>
+                    <Button type="submit" disabled={isSubmitting}>
                       {isSubmitting ? "Saving..." : "Save"}
                     </Button>
                   )}
