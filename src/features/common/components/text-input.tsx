@@ -13,6 +13,7 @@ interface TextInputProps<T> {
   description?: string;
   type?: "text" | "number";
   placeholder?: string;
+  maxLength?: number;
   format?: (value: T) => string;
   orientation?: "vertical" | "horizontal";
   className?: string;
@@ -28,6 +29,7 @@ export default function TextInput<T>({
   description,
   id,
   placeholder,
+  maxLength,
   type = "text",
   format = (value) => (value ? value.toString() : ""),
   orientation = "vertical",
@@ -39,13 +41,15 @@ export default function TextInput<T>({
   onChange = () => {},
 }: TextInputProps<T>) {
   const field = useFieldContext<T>();
+  // Errors stay hidden until the user touches the field (or submits).
+  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
 
   placeholder = placeholder ?? label;
   return (
     <Field
       orientation={orientation}
       className={className}
-      data-invalid={!field.state.meta.isValid}
+      data-invalid={isInvalid}
     >
       {!hideLabel && (
         <FieldLabel
@@ -59,21 +63,28 @@ export default function TextInput<T>({
         id={id}
         type={type}
         placeholder={placeholder}
+        maxLength={maxLength}
         value={format(field.state.value) ?? initialValue}
         onBlur={field.handleBlur}
         disabled={disabled}
         onChange={(e) => {
+          // Store the formatted value so the field never holds characters
+          // the formatter hides from the user (e.g. pasted extra digits).
           field.handleChange(
-            (type === "text" ? e.target.value : Number(e.target.value)) as T,
+            (type === "text"
+              ? format(e.target.value as T)
+              : Number(e.target.value)) as T,
           );
           onChange(e.target.value);
         }}
-        aria-invalid={!field.state.meta.isValid}
+        aria-invalid={isInvalid}
       />
       {description && <FieldDescription>{description}</FieldDescription>}
-      {!hideError && !field.state.meta.isValid && (
+      {!hideError && isInvalid && (
         <FieldError>
-          {field.state.meta.errors.map((error) => error?.message).join(", ")}
+          {[
+            ...new Set(field.state.meta.errors.map((error) => error?.message)),
+          ].join(", ")}
         </FieldError>
       )}
     </Field>

@@ -25,8 +25,14 @@ export default function TextArea({
   orientation = "vertical",
 }: TextInputProps) {
   const field = useFieldContext<string>();
+  // Errors stay hidden until the user touches the field (or submits).
+  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
   return (
-    <Field orientation={orientation} className={className}>
+    <Field
+      orientation={orientation}
+      className={className}
+      data-invalid={isInvalid}
+    >
       <FieldLabel
         htmlFor={id}
         className="text-base font-medium w-24 text-right shrink-0"
@@ -40,11 +46,14 @@ export default function TextArea({
         value={field.state.value}
         onBlur={field.handleBlur}
         onChange={(e) => field.handleChange(e.target.value)}
+        aria-invalid={isInvalid}
       />
       {description && <FieldDescription>{description}</FieldDescription>}
-      {!field.state.meta.isValid && (
+      {isInvalid && (
         <FieldError>
-          {field.state.meta.errors.map((error) => error?.message).join(", ")}
+          {[
+            ...new Set(field.state.meta.errors.map((error) => error?.message)),
+          ].join(", ")}
         </FieldError>
       )}
     </Field>
