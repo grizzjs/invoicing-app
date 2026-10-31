@@ -19,14 +19,16 @@ type HeaderActionsGroupProps = {
 };
 
 export function HeaderActionsGroup({ purchaseOrder }: HeaderActionsGroupProps) {
+  const { mutate: finalizePurchaseOrder, isPending: isFinalizing } =
+    useUpdatePurchaseOrder();
   const { mutate: approvePurchaseOrder, isPending: isApproving } =
     useUpdatePurchaseOrder();
   const { mutate: cancelPurchaseOrder, isPending: isCancelling } =
     useUpdatePurchaseOrder();
   const queryClient = useQueryClient();
-  const [confirming, setConfirming] = useState<"approve" | "cancel" | null>(
-    null,
-  );
+  const [confirming, setConfirming] = useState<
+    "finalize" | "approve" | "cancel" | null
+  >(null);
   const [creatingDelivery, setCreatingDelivery] = useState(false);
 
   const fullyDelivered = purchaseOrder.lineItems.every(
@@ -42,6 +44,12 @@ export function HeaderActionsGroup({ purchaseOrder }: HeaderActionsGroupProps) {
     });
     setConfirming(null);
   };
+
+  const finalize = () =>
+    finalizePurchaseOrder(
+      { id: purchaseOrder.id, data: { status: Status.Finalized } },
+      { onSuccess },
+    );
 
   const approve = () =>
     approvePurchaseOrder(
@@ -59,7 +67,9 @@ export function HeaderActionsGroup({ purchaseOrder }: HeaderActionsGroupProps) {
     <>
       <HeaderActions>
         {isIn([Status.Draft], purchaseOrder.status) && (
-          <Button>Finalize Order</Button>
+          <Button onClick={() => setConfirming("finalize")}>
+            Finalize Order
+          </Button>
         )}
         {isIn([Status.Finalized], purchaseOrder.status) && (
           <Button onClick={() => setConfirming("approve")}>
@@ -95,6 +105,16 @@ export function HeaderActionsGroup({ purchaseOrder }: HeaderActionsGroupProps) {
         </Button>
       </HeaderActions>
 
+      <ConfirmDialog
+        open={confirming === "finalize"}
+        onOpenChange={(open) => !open && setConfirming(null)}
+        title="Finalize Order"
+        description={`Finalize purchase order #${purchaseOrder.id}? It will be ready for approval.`}
+        confirmLabel="Finalize Order"
+        pendingLabel="Finalizing..."
+        isPending={isFinalizing}
+        onConfirm={finalize}
+      />
       <ConfirmDialog
         open={confirming === "approve"}
         onOpenChange={(open) => !open && setConfirming(null)}
