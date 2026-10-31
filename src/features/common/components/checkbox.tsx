@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/field";
 import { useFieldContext } from "@/features/common/hooks/form-context";
 
-interface CheckboxProps<T> {
+interface CheckboxProps {
   label: string;
   id: number;
   description?: string;
@@ -16,14 +16,14 @@ interface CheckboxProps<T> {
   getLabel: () => React.ReactNode;
 }
 
-export default function CheckBox<T>({
+export default function CheckBox({
   label,
   description,
   id,
   orientation = "horizontal",
   className = "",
   getLabel,
-}: CheckboxProps<T>) {
+}: CheckboxProps) {
   const field = useFieldContext<number>();
 
   return (

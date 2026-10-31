@@ -20,7 +20,9 @@ import {
   FieldLabel,
 } from "../../../components/ui/field";
 
-export default function Select({
+export default function Select<
+  T extends { id: number; name: string; email?: string },
+>({
   label,
   id,
   description,
@@ -47,16 +49,14 @@ export default function Select({
         {label}
       </FieldLabel>
       <Combobox
-        items={customers}
-        itemToStringValue={(customer: (typeof customers)[number]) =>
-          `${customer.id}`
-        }
+        items={entity}
+        itemToStringValue={(customer: T) => `${customer.id}`}
         itemToStringLabel={(customer) => customer.name}
         onValueChange={(value) => {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           field.handleChange(value as any);
 
-          onChange(value);
+          onChange?.(value);
         }}
       >
         <ComboboxInput

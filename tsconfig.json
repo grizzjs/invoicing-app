@@ -3,7 +3,6 @@
     "target": "es2017",
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "strictNullChecks": true,
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     }

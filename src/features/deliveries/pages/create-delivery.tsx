@@ -25,6 +25,14 @@ import { Plus, SquareArrowOutUpRight, Trash2 } from "lucide-react";
 import { useEffect } from "react";
 import z from "zod";
 
+declare module "@tanstack/react-router" {
+  interface HistoryState {
+    customerId?: number;
+    ids?: number[];
+    purchaseOrderId?: number;
+  }
+}
+
 const schema = z.object({
   customer: z.string().min(1, "Customer is required"),
   address: z.string().min(1, "Address is required"),
@@ -482,7 +490,7 @@ export default function CreateDeliveryPage() {
             </Button>
             <form.Subscribe selector={(state) => state.isSubmitting}>
               {(isSubmitting) => (
-                <Button onClick={form.handleSubmit} disabled={isSubmitting}>
+                <Button type="submit" disabled={isSubmitting}>
                   {isSubmitting ? "Saving..." : "Save"}
                 </Button>
               )}

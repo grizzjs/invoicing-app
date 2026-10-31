@@ -7,7 +7,7 @@ export function formatDate(
   if (!date) return "";
 
   if (date instanceof DateTime) {
-    date = date.toISO();
+    date = date.toJSDate();
   }
   try {
     return new Intl.DateTimeFormat("en-US", {
@@ -33,7 +33,7 @@ export function formatDateFromISO(
       day: opts.day ?? "numeric",
       year: opts.year ?? "numeric",
       ...opts,
-    }).format(DateTime.fromISO(date));
+    }).format(DateTime.fromISO(date).toJSDate());
   } catch {
     return "";
   }
