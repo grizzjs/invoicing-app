@@ -8,6 +8,7 @@
 
 export * from './buffer';
 export * from './collectionDto';
+export * from './createCollectionDto';
 export * from './createCustomerDto';
 export * from './createDeliveryReceiptDto';
 export * from './createDeliveryReceiptDtoPurchaseOrder';
@@ -38,6 +39,7 @@ export * from './invoiceDtoTerm';
 export * from './purchaseOrderDto';
 export * from './purchaseOrderDtoStatus';
 export * from './purchaseOrderLineItemDto';
+export * from './s3UploadDto';
 export * from './updateCustomerDto';
 export * from './updateDeliveryReceiptDto';
 export * from './updateDeliveryReceiptDtoStatus';

@@ -4,6 +4,7 @@ import {
   updatePurchaseOrderLineItem,
 } from "@/api/endpoints/line-items/line-items";
 import { useGetPurchaseOrder } from "@/api/endpoints/purchase-orders/purchase-orders";
+import { uploadFile, useGetFiles } from "@/api/endpoints/s3/s3";
 import { Header } from "@/components/ui/header";
 import isIn from "@/lib/is-in";
 import { useQueryClient } from "@tanstack/react-query";
@@ -14,6 +15,12 @@ import PurchaseOrderForm, {
 import Status from "../enum";
 import entityToBadge from "../lib/entity-to-badge";
 
+async function uploadFiles(purchaseOrderId: number, files: File[]) {
+  await Promise.all(
+    files.map((file) => uploadFile("purchase-orders", String(purchaseOrderId), { file })),
+  );
+}
+
 export default function EditPurchaseOrderPage() {
   const params = useParams({ from: "/purchase-orders/$purchaseOrderId/edit" });
   const {
@@ -21,6 +28,11 @@ export default function EditPurchaseOrderPage() {
     isLoading,
     isError,
   } = useGetPurchaseOrder(params.purchaseOrderId);
+
+  const { data: existingFiles = [] } = useGetFiles(
+    "purchase-orders",
+    params.purchaseOrderId,
+  );
 
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -33,7 +45,7 @@ export default function EditPurchaseOrderPage() {
 
   // Line items are saved through the line item endpoints: removed rows are
   // deleted, existing rows updated and new rows created.
-  const save = async ({ lineItems }: PurchaseOrderFormValues) => {
+  const save = async ({ lineItems }: PurchaseOrderFormValues, files: File[]) => {
     const keptIds = lineItems.map((lineItem) => lineItem.id);
     await Promise.all([
       ...purchaseOrder.lineItems
@@ -47,6 +59,9 @@ export default function EditPurchaseOrderPage() {
           : createPurchaseOrderLineItem(purchaseOrder.id, lineItem),
       ),
     ]);
+    if (files.length > 0) {
+      await uploadFiles(purchaseOrder.id, files);
+    }
     await queryClient.invalidateQueries({ queryKey: ["/purchase-orders"] });
     navigate({ to: viewPath });
   };
@@ -66,6 +81,7 @@ export default function EditPurchaseOrderPage() {
           createDate={purchaseOrder.createDate}
           lockCustomer={true}
           cancelTo={viewPath}
+          existingFiles={existingFiles}
           defaultValues={{
             customer: { id: customer.id },
             address: customer.address,
