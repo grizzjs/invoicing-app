@@ -6,6 +6,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { useFieldContext } from "@/features/common/hooks/form-context";
+import { getFieldError } from "@/features/common/lib/field-error";
 
 interface CheckboxProps {
   label: string;
@@ -25,12 +26,13 @@ export default function CheckBox({
   getLabel,
 }: CheckboxProps) {
   const field = useFieldContext<number>();
+  const { isInvalid } = getFieldError(field.state.meta);
 
   return (
     <Field
       orientation={orientation}
       className={`${className}`}
-      data-invalid={!field.state.meta.isValid}
+      data-invalid={isInvalid}
     >
       <Checkbox
         id={id.toString()}

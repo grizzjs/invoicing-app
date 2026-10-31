@@ -7,6 +7,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 
 import { useFieldContext } from "@/features/common/hooks/form-context";
+import { getFieldError } from "@/features/common/lib/field-error";
 
 interface TextInputProps {
   label: string;
@@ -25,8 +26,7 @@ export default function TextArea({
   orientation = "vertical",
 }: TextInputProps) {
   const field = useFieldContext<string>();
-  // Errors stay hidden until the user touches the field (or submits).
-  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+  const { isInvalid, message: errorMessage } = getFieldError(field.state.meta);
   return (
     <Field
       orientation={orientation}
@@ -49,13 +49,7 @@ export default function TextArea({
         aria-invalid={isInvalid}
       />
       {description && <FieldDescription>{description}</FieldDescription>}
-      {isInvalid && (
-        <FieldError>
-          {[
-            ...new Set(field.state.meta.errors.map((error) => error?.message)),
-          ].join(", ")}
-        </FieldError>
-      )}
+      {isInvalid && <FieldError>{errorMessage}</FieldError>}
     </Field>
   );
 }

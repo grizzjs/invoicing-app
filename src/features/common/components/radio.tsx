@@ -2,6 +2,7 @@ import { Field, FieldSet } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useFieldContext } from "@/features/common/hooks/form-context";
+import { getFieldError } from "@/features/common/lib/field-error";
 import { cn } from "@/lib/utils";
 
 interface CheckboxProps<T> {
@@ -19,13 +20,14 @@ export default function Radio<T extends { id: string | number }>({
   getLabel,
 }: CheckboxProps<T>) {
   const field = useFieldContext<string>();
+  const { isInvalid } = getFieldError(field.state.meta);
 
   return (
     <FieldSet>
       <Field
         orientation={orientation}
         className={`${className}`}
-        data-invalid={!field.state.meta.isValid}
+        data-invalid={isInvalid}
       >
         <RadioGroup
           value={field.state.value}

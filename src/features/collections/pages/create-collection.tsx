@@ -15,12 +15,11 @@ import { useAppForm } from "@/features/common/hooks/form";
 import formatPhoneNumber from "@/features/customers/lib/formatPhoneNumber";
 import { today } from "@/lib/date-utils";
 import { formatDate } from "@/lib/format-date";
-import { formOptions, revalidateLogic, useStore } from "@tanstack/react-form";
+import { formOptions } from "@tanstack/react-form";
 import { Link } from "@tanstack/react-router";
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
 import z from "zod";
-import { ValidationErrorBanner } from "../../common/components/validation-banner";
 import InvoiceDialog from "../components/invoice-dialog";
 
 const schema = z.object({
@@ -28,7 +27,7 @@ const schema = z.object({
   address: z.string().min(1, "Address is required"),
   phoneNumber: z.string().min(1, "Phone number is required"),
   email: z.string().email("Invalid email address"),
-  tin: z.string().regex(/^\d{3}-\d{3}-\d{3}-\d{4}$/, {
+  tin: z.string().regex(/^\d{3}-\d{3}-\d{3}-\d{5}$/, {
     message: "TIN must follow the format: XXX-XXX-XXX-XXXXX",
   }),
   amount: z.number().positive(),
@@ -96,15 +95,10 @@ export default function CreateCollectionPage() {
       // );
     },
     validators: {
-      onDynamic: schema,
+      onMount: schema,
+      onChange: schema,
     },
-    validationLogic: revalidateLogic({
-      mode: "submit",
-      modeAfterSubmission: "blur",
-    }),
   });
-
-  const errorMap = useStore(form.store, (state) => state.errorMap);
 
   if (isLoading) return <div>"Loading..."</div>;
 
@@ -120,7 +114,6 @@ export default function CreateCollectionPage() {
           }}
         >
           <FieldGroup className="gap-6 px-6 mb-6">
-            <ValidationErrorBanner errorMap={errorMap} />
             <FieldSet className="grid grid-cols-2 gap-6">
               <div className="col-span-1 pl-10"></div>
               <div className="col-span-1 text-base font-medium">
@@ -176,7 +169,6 @@ export default function CreateCollectionPage() {
                           orientation="horizontal"
                           className="flex items-center gap-5"
                           disabled={true}
-                          hideError={true}
                         />
                       );
                     }}
@@ -192,7 +184,6 @@ export default function CreateCollectionPage() {
                           className="flex items-center gap-5"
                           format={formatPhoneNumber}
                           disabled={true}
-                          hideError={true}
                         />
                       );
                     }}
@@ -210,7 +201,6 @@ export default function CreateCollectionPage() {
                           orientation="horizontal"
                           className="flex items-end gap-5"
                           disabled={true}
-                          hideError={true}
                         />
                       );
                     }}
@@ -225,7 +215,6 @@ export default function CreateCollectionPage() {
                           orientation="horizontal"
                           className="flex items-center gap-5"
                           disabled={true}
-                          hideError={true}
                         />
                       );
                     }}
@@ -249,7 +238,6 @@ export default function CreateCollectionPage() {
                           orientation="horizontal"
                           className="flex items-end gap-5"
                           type="number"
-                          hideError={true}
                         />
                       );
                     }}
@@ -263,7 +251,6 @@ export default function CreateCollectionPage() {
                           label="WHT (%)"
                           orientation="horizontal"
                           className="flex items-center gap-5"
-                          hideError={true}
                           type="number"
                         />
                       );
@@ -327,7 +314,6 @@ export default function CreateCollectionPage() {
                                         orientation="horizontal"
                                         className="flex items-center gap-5"
                                         hideLabel={true}
-                                        hideError={true}
                                       />
                                     );
                                   }}
@@ -388,9 +374,11 @@ export default function CreateCollectionPage() {
             <Button variant="outline" asChild>
               <Link to="/collections">Cancel</Link>
             </Button>
-            <form.Subscribe selector={(state) => state.isSubmitting}>
-              {(isSubmitting) => (
-                <Button type="submit" disabled={isSubmitting}>
+            <form.Subscribe
+              selector={(state) => [state.canSubmit, state.isSubmitting]}
+            >
+              {([canSubmit, isSubmitting]) => (
+                <Button type="submit" disabled={!canSubmit}>
                   {isSubmitting ? "Saving..." : "Save"}
                 </Button>
               )}
