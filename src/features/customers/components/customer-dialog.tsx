@@ -19,9 +19,9 @@ import { useEffect, useState } from "react";
 import z from "zod";
 import formatPhoneNumber from "../lib/formatPhoneNumber";
 import formatTin from "../lib/formatTIN";
+import { PHONE_MAX_LENGTH, phoneNumberSchema } from "../lib/phoneNumberSchema";
 
-// Lengths of a fully formatted value: "(917) 517 9241" and "XXX-XXX-XXX-XXXXX".
-const PHONE_MAX_LENGTH = 14;
+// Length of a fully formatted TIN: "XXX-XXX-XXX-XXXXX".
 const TIN_MAX_LENGTH = 17;
 
 const countDigits = (value: string) => value.replace(/\D/g, "").length;
@@ -31,13 +31,7 @@ const countDigits = (value: string) => value.replace(/\D/g, "").length;
 const schema = z.object({
   name: z.string().trim().min(1, "Name is required"),
   address: z.string().trim().min(1, "Address is required"),
-  phoneNumber: z
-    .string()
-    .min(1, { message: "Phone number is required", abort: true })
-    .refine((value) => countDigits(value) === 10, {
-      message: "Phone number must be 10 digits",
-    })
-    .transform(formatPhoneNumber),
+  phoneNumber: phoneNumberSchema,
   email: z
     .string()
     .trim()

@@ -12,14 +12,14 @@ import {
 import { FieldGroup } from "@/components/ui/field";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAppForm } from "@/features/common/hooks/form";
-import { formOptions, revalidateLogic } from "@tanstack/react-form";
+import { formOptions } from "@tanstack/react-form";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import z from "zod";
 
 const schema = z.object({
-  purchaseOrderId: z.string(),
-  terms: z.string(),
+  purchaseOrderId: z.string().min(1, "Purchase order is required"),
+  terms: z.string().min(1, "Terms are required"),
   search: z.string(),
 });
 
@@ -45,6 +45,23 @@ export default function InvoiceDialog({
   open,
   onOpenChange,
 }: InvoiceDialogProps) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-xl">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-bold">
+            Create Sales Invoice
+          </DialogTitle>
+        </DialogHeader>
+        {/* Rendered inside DialogContent so the form remounts on every open,
+            which re-runs onMount validation with fresh values. */}
+        <InvoiceForm onClose={() => onOpenChange(false)} />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function InvoiceForm({ onClose }: { onClose: () => void }) {
   const { data: purchaseOrders, isLoading } = useGetPurchaseOrders();
   const { mutate } = useCreateInvoice();
   const [search, setSearch] = useState("");
@@ -75,19 +92,10 @@ export default function InvoiceDialog({
       //navigate({ to: "/deliveries/new", state: processed });
     },
     validators: {
-      onDynamic: schema,
+      onMount: schema,
+      onChange: schema,
     },
-    validationLogic: revalidateLogic({
-      mode: "submit",
-      modeAfterSubmission: "blur",
-    }),
   });
-
-  const openChange = (state: boolean) => {
-    form.reset();
-    onOpenChange(state);
-    setSearch("");
-  };
 
   if (isLoading) return <div>Loading...</div>;
 
@@ -111,81 +119,72 @@ export default function InvoiceDialog({
   ];
 
   return (
-    <Dialog open={open} onOpenChange={openChange}>
-      <DialogContent className="sm:max-w-xl">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-bold">
-            Create Sales Invoice
-          </DialogTitle>
-        </DialogHeader>
-
-        <div className="flex flex-col gap-4 py-2">
-          <form.AppForm>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                form.handleSubmit();
+    <div className="flex flex-col gap-4 py-2">
+      <form.AppForm>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            form.handleSubmit();
+          }}
+        >
+          <FieldGroup className="mb-6">
+            <form.AppField name="terms">
+              {(field) => {
+                return (
+                  <field.Select
+                    id="purchaseOrderId"
+                    label="Payment Terms"
+                    entities={terms}
+                  />
+                );
               }}
-            >
-              <FieldGroup className="mb-6">
-                <form.AppField name="terms">
-                  {(field) => {
-                    return (
-                      <field.Select
-                        id="purchaseOrderId"
-                        label="Payment Terms"
-                        entities={terms}
-                      />
-                    );
-                  }}
-                </form.AppField>
-                <form.AppField name="search">
-                  {(field) => {
-                    return (
-                      <field.TextInput
-                        id="search"
-                        label="Documents"
-                        onChange={(value) => {
-                          setSearch(value);
-                        }}
-                      />
-                    );
-                  }}
-                </form.AppField>
+            </form.AppField>
+            <form.AppField name="search">
+              {(field) => {
+                return (
+                  <field.TextInput
+                    id="search"
+                    label="Documents"
+                    onChange={(value) => {
+                      setSearch(value);
+                    }}
+                  />
+                );
+              }}
+            </form.AppField>
 
-                <ScrollArea className="h-72">
-                  <div className="flex flex-col gap-1.5 pr-2">
-                    <form.AppField name="purchaseOrderId">
-                      {(field) => {
-                        return (
-                          <field.Radio
-                            label="Documents"
-                            entities={search ? purchaseOrdersToList : []}
-                            getLabel={(po) => (
-                              <div className="flex flex-1 items-center gap-3 min-w-0 text-sm">
-                                <span className="font-semibold w-28 shrink-0">
-                                  {po.id}
-                                </span>
-                                <span className="flex-1 truncate text-muted-foreground">
-                                  {po.customer.name}
-                                </span>
-                                <span className="shrink-0 text-muted-foreground whitespace-nowrap">
-                                  {
-                                    po.deliveryReceipts?.filter(
-                                      (dr) => !dr.invoice,
-                                    ).length
-                                  }{" "}
-                                  Delivery Receipt(s)
-                                </span>
-                              </div>
-                            )}
-                          />
-                        );
-                      }}
-                    </form.AppField>
-                  </div>
-                </ScrollArea>
-                {/* <div className="flex flex-col gap-2">
+            <ScrollArea className="h-72">
+              <div className="flex flex-col gap-1.5 pr-2">
+                <form.AppField name="purchaseOrderId">
+                  {(field) => {
+                    return (
+                      <field.Radio
+                        label="Documents"
+                        entities={search ? purchaseOrdersToList : []}
+                        getLabel={(po) => (
+                          <div className="flex flex-1 items-center gap-3 min-w-0 text-sm">
+                            <span className="font-semibold w-28 shrink-0">
+                              {po.id}
+                            </span>
+                            <span className="flex-1 truncate text-muted-foreground">
+                              {po.customer.name}
+                            </span>
+                            <span className="shrink-0 text-muted-foreground whitespace-nowrap">
+                              {
+                                po.deliveryReceipts?.filter((dr) => !dr.invoice)
+                                  .length
+                              }{" "}
+                              Delivery Receipt(s)
+                            </span>
+                          </div>
+                        )}
+                      />
+                    );
+                  }}
+                </form.AppField>
+              </div>
+            </ScrollArea>
+            {/* <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between">
                     <form.AppField name={`ids`}>
                       {(field) => (
@@ -257,29 +256,29 @@ export default function InvoiceDialog({
                     </ScrollArea>
                   )}
                 </div> */}
-              </FieldGroup>
-              <DialogFooter>
-                <DialogClose asChild>
-                  <Button
-                    onClick={() => onOpenChange(false)}
-                    className="text-base font-medium"
-                    variant="outline"
-                  >
-                    Close
-                  </Button>
-                </DialogClose>
-                <form.Subscribe selector={(state) => state.isSubmitting}>
-                  {(isSubmitting) => (
-                    <Button type="submit" disabled={isSubmitting}>
-                      {isSubmitting ? "Saving..." : "Save"}
-                    </Button>
-                  )}
-                </form.Subscribe>
-              </DialogFooter>
-            </form>
-          </form.AppForm>
-        </div>
-      </DialogContent>
-    </Dialog>
+          </FieldGroup>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button
+                onClick={onClose}
+                className="text-base font-medium"
+                variant="outline"
+              >
+                Close
+              </Button>
+            </DialogClose>
+            <form.Subscribe
+              selector={(state) => [state.canSubmit, state.isSubmitting]}
+            >
+              {([canSubmit, isSubmitting]) => (
+                <Button type="submit" disabled={!canSubmit}>
+                  {isSubmitting ? "Saving..." : "Save"}
+                </Button>
+              )}
+            </form.Subscribe>
+          </DialogFooter>
+        </form>
+      </form.AppForm>
+    </div>
   );
 }

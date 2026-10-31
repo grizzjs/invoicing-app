@@ -16,12 +16,11 @@ import { useAppForm } from "@/features/common/hooks/form";
 import formatPhoneNumber from "@/features/customers/lib/formatPhoneNumber";
 import { today } from "@/lib/date-utils";
 import { formatDate } from "@/lib/format-date";
-import { formOptions, revalidateLogic, useStore } from "@tanstack/react-form";
+import { formOptions } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Trash2 } from "lucide-react";
 import z from "zod";
-import { ValidationErrorBanner } from "../../common/components/validation-banner";
 
 const schema = z.object({
   customer: z.object({ id: z.number() }, "Customer is required"),
@@ -95,15 +94,10 @@ export default function CreatePurchaseOrderPage() {
       );
     },
     validators: {
-      onDynamic: schema,
+      onMount: schema,
+      onChange: schema,
     },
-    validationLogic: revalidateLogic({
-      mode: "submit",
-      modeAfterSubmission: "blur",
-    }),
   });
-
-  const errorMap = useStore(form.store, (state) => state.errorMap);
 
   if (isLoading) return <div>"Loading..."</div>;
 
@@ -119,7 +113,6 @@ export default function CreatePurchaseOrderPage() {
           }}
         >
           <FieldGroup className="gap-6 px-6 mb-6">
-            <ValidationErrorBanner errorMap={errorMap} />
             <FieldSet className="grid grid-cols-2 gap-6">
               <div className="col-span-1 pl-10"></div>
               <div className="col-span-1 text-base font-medium">
@@ -175,7 +168,6 @@ export default function CreatePurchaseOrderPage() {
                           orientation="horizontal"
                           className="flex items-center gap-5"
                           disabled={true}
-                          hideError={true}
                         />
                       );
                     }}
@@ -191,7 +183,6 @@ export default function CreatePurchaseOrderPage() {
                           className="flex items-center gap-5"
                           format={formatPhoneNumber}
                           disabled={true}
-                          hideError={true}
                         />
                       );
                     }}
@@ -209,7 +200,6 @@ export default function CreatePurchaseOrderPage() {
                           orientation="horizontal"
                           className="flex items-end gap-5"
                           disabled={true}
-                          hideError={true}
                         />
                       );
                     }}
@@ -224,7 +214,6 @@ export default function CreatePurchaseOrderPage() {
                           orientation="horizontal"
                           className="flex items-center gap-5"
                           disabled={true}
-                          hideError={true}
                         />
                       );
                     }}
@@ -274,7 +263,6 @@ export default function CreatePurchaseOrderPage() {
                                         orientation="horizontal"
                                         className="flex items-center gap-5"
                                         hideLabel={true}
-                                        hideError={true}
                                       />
                                     );
                                   }}
@@ -292,7 +280,6 @@ export default function CreatePurchaseOrderPage() {
                                         orientation="horizontal"
                                         className="flex items-center gap-5"
                                         hideLabel={true}
-                                        hideError={true}
                                       />
                                     );
                                   }}
@@ -311,7 +298,6 @@ export default function CreatePurchaseOrderPage() {
                                         orientation="horizontal"
                                         className="flex items-center gap-5"
                                         hideLabel={true}
-                                        hideError={true}
                                       />
                                     );
                                   }}
@@ -330,7 +316,6 @@ export default function CreatePurchaseOrderPage() {
                                         orientation="horizontal"
                                         className="flex items-center gap-5"
                                         hideLabel={true}
-                                        hideError={true}
                                       />
                                     );
                                   }}
@@ -392,9 +377,11 @@ export default function CreatePurchaseOrderPage() {
             <Button variant="outline" asChild>
               <Link to="/purchase-orders">Cancel</Link>
             </Button>
-            <form.Subscribe selector={(state) => state.isSubmitting}>
-              {(isSubmitting) => (
-                <Button type="submit" disabled={isSubmitting}>
+            <form.Subscribe
+              selector={(state) => [state.canSubmit, state.isSubmitting]}
+            >
+              {([canSubmit, isSubmitting]) => (
+                <Button type="submit" disabled={!canSubmit}>
                   {isSubmitting ? "Saving..." : "Save"}
                 </Button>
               )}

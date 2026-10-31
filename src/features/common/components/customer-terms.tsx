@@ -13,6 +13,7 @@ import {
   ItemTitle,
 } from "@/components/ui/item";
 import { useFieldContext } from "@/features/common/hooks/form-context";
+import { getFieldError } from "@/features/common/lib/field-error";
 import {
   Field,
   FieldDescription,
@@ -40,6 +41,7 @@ export default function Select<
   onChange?: (value) => void;
 }) {
   const field = useFieldContext<string>();
+  const { isInvalid, message: errorMessage } = getFieldError(field.state.meta);
   return (
     <Field orientation={orientation} className={className}>
       <FieldLabel
@@ -84,11 +86,7 @@ export default function Select<
       </Combobox>
 
       {description && <FieldDescription>{description}</FieldDescription>}
-      {!field.state.meta.isValid && (
-        <FieldError>
-          {field.state.meta.errors.map((error) => error?.message).join(", ")}
-        </FieldError>
-      )}
+      {isInvalid && <FieldError>{errorMessage}</FieldError>}
     </Field>
   );
 }

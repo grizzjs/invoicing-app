@@ -13,12 +13,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ValidationErrorBanner } from "@/features/common/components/validation-banner";
 import { useAppForm } from "@/features/common/hooks/form";
 import formatPhoneNumber from "@/features/customers/lib/formatPhoneNumber";
+import {
+  PHONE_MAX_LENGTH,
+  phoneNumberSchema,
+} from "@/features/customers/lib/phoneNumberSchema";
 import { today } from "@/lib/date-utils";
 import { formatDate } from "@/lib/format-date";
-import { formOptions, revalidateLogic, useStore } from "@tanstack/react-form";
+import { formOptions } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Plus, SquareArrowOutUpRight, Trash2 } from "lucide-react";
@@ -36,9 +39,9 @@ declare module "@tanstack/react-router" {
 const schema = z.object({
   customer: z.string().min(1, "Customer is required"),
   address: z.string().min(1, "Address is required"),
-  phoneNumber: z.string().min(1, "Phone number is required"),
+  phoneNumber: phoneNumberSchema,
   email: z.string().email("Invalid email address"),
-  tin: z.string().regex(/^\d{3}-\d{3}-\d{3}-\d{4}$/, {
+  tin: z.string().regex(/^\d{3}-\d{3}-\d{3}-\d{5}$/, {
     message: "TIN must follow the format: XXX-XXX-XXX-XXXXX",
   }),
   lineItems: z
@@ -157,15 +160,11 @@ export default function CreateDeliveryPage() {
       );
     },
     validators: {
-      onDynamic: schema,
+      onMount: schema,
+      onChange: schema,
     },
-    validationLogic: revalidateLogic({
-      mode: "submit",
-      modeAfterSubmission: "blur",
-    }),
   });
 
-  const errorMap = useStore(form.store, (state) => state.errorMap);
   useEffect(() => {
     if (!customer || !purchaseOrder) return;
     setInitialFormValues(form, customer, ids, purchaseOrder.lineItems);
@@ -189,7 +188,6 @@ export default function CreateDeliveryPage() {
           }}
         >
           <FieldGroup className="gap-6 px-6 mb-6">
-            <ValidationErrorBanner errorMap={errorMap} />
             <FieldSet className="grid grid-cols-2 gap-6 pb-3">
               <div className="col-span-1 text-base font-medium">
                 <div className="flex gap-6">
@@ -234,7 +232,6 @@ export default function CreateDeliveryPage() {
                           orientation="horizontal"
                           className="flex items-center gap-5"
                           disabled={true}
-                          hideError={true}
                           initialValue={customer.name}
                         />
                       );
@@ -252,7 +249,6 @@ export default function CreateDeliveryPage() {
                           label="Address"
                           orientation="horizontal"
                           className="flex items-center gap-5"
-                          hideError={true}
                         />
                       );
                     }}
@@ -267,7 +263,7 @@ export default function CreateDeliveryPage() {
                           orientation="horizontal"
                           className="flex items-center gap-5"
                           format={formatPhoneNumber}
-                          hideError={true}
+                          maxLength={PHONE_MAX_LENGTH}
                         />
                       );
                     }}
@@ -285,7 +281,6 @@ export default function CreateDeliveryPage() {
                           orientation="horizontal"
                           className="flex items-end gap-5"
                           disabled={true}
-                          hideError={true}
                         />
                       );
                     }}
@@ -300,7 +295,6 @@ export default function CreateDeliveryPage() {
                           orientation="horizontal"
                           className="flex items-center gap-5"
                           disabled={true}
-                          hideError={true}
                         />
                       );
                     }}
@@ -395,7 +389,6 @@ export default function CreateDeliveryPage() {
                                         className="flex items-center gap-5"
                                         hideLabel={true}
                                         disabled={true}
-                                        hideError={true}
                                       />
                                     );
                                   }}
@@ -415,7 +408,6 @@ export default function CreateDeliveryPage() {
                                         className="flex items-center gap-5"
                                         hideLabel={true}
                                         disabled={true}
-                                        hideError={true}
                                       />
                                     );
                                   }}
@@ -434,7 +426,6 @@ export default function CreateDeliveryPage() {
                                         orientation="horizontal"
                                         className="flex items-center gap-5"
                                         hideLabel={true}
-                                        hideError={true}
                                       />
                                     );
                                   }}
@@ -488,9 +479,11 @@ export default function CreateDeliveryPage() {
             <Button variant="outline" asChild>
               <Link to="/deliveries">Cancel</Link>
             </Button>
-            <form.Subscribe selector={(state) => state.isSubmitting}>
-              {(isSubmitting) => (
-                <Button type="submit" disabled={isSubmitting}>
+            <form.Subscribe
+              selector={(state) => [state.canSubmit, state.isSubmitting]}
+            >
+              {([canSubmit, isSubmitting]) => (
+                <Button type="submit" disabled={!canSubmit}>
                   {isSubmitting ? "Saving..." : "Save"}
                 </Button>
               )}

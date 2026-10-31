@@ -6,6 +6,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useFieldContext } from "@/features/common/hooks/form-context";
+import { getFieldError } from "@/features/common/lib/field-error";
 
 interface TextInputProps<T> {
   label: string;
@@ -41,24 +42,11 @@ export default function TextInput<T>({
   onChange = () => {},
 }: TextInputProps<T>) {
   const field = useFieldContext<T>();
-  // Errors stay hidden until the user touches the field (or submits).
-  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+  const { isInvalid, message: errorMessage } = getFieldError(field.state.meta);
 
   placeholder = placeholder ?? label;
-  return (
-    <Field
-      orientation={orientation}
-      className={className}
-      data-invalid={isInvalid}
-    >
-      {!hideLabel && (
-        <FieldLabel
-          htmlFor={id}
-          className="text-base font-medium w-24 text-right shrink-0"
-        >
-          {label}
-        </FieldLabel>
-      )}
+  const control = (
+    <>
       <Input
         id={id}
         type={type}
@@ -80,12 +68,30 @@ export default function TextInput<T>({
         aria-invalid={isInvalid}
       />
       {description && <FieldDescription>{description}</FieldDescription>}
-      {!hideError && isInvalid && (
-        <FieldError>
-          {[
-            ...new Set(field.state.meta.errors.map((error) => error?.message)),
-          ].join(", ")}
-        </FieldError>
+      {!hideError && isInvalid && <FieldError>{errorMessage}</FieldError>}
+    </>
+  );
+
+  return (
+    <Field
+      orientation={orientation}
+      className={className}
+      data-invalid={isInvalid}
+    >
+      {!hideLabel && (
+        <FieldLabel
+          htmlFor={id}
+          className="text-base font-medium w-24 text-right shrink-0"
+        >
+          {label}
+        </FieldLabel>
+      )}
+      {/* In a horizontal row the message would otherwise sit beside the input
+          and squeeze it, so stack the input and its message. */}
+      {orientation === "horizontal" ? (
+        <div className="flex w-full min-w-0 flex-col gap-1">{control}</div>
+      ) : (
+        control
       )}
     </Field>
   );
