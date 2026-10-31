@@ -12,79 +12,54 @@ import { createFileRoute } from '@tanstack/react-router'
 
 import { Route as rootRouteImport } from './routes/__root'
 
-const IndexLazyRouteImport = createFileRoute('/')()
-const CollectionsLazyRouteImport = createFileRoute('/collections')()
-const CustomersLazyRouteImport = createFileRoute('/customers')()
-const DeliveriesLazyRouteImport = createFileRoute('/deliveries')()
-const InvoicesLazyRouteImport = createFileRoute('/invoices')()
 const PurchaseOrdersLazyRouteImport = createFileRoute('/purchase-orders')()
-const CollectionsIndexLazyRouteImport = createFileRoute('/collections/')()
-const CollectionsCollectionIdLazyRouteImport = createFileRoute(
-  '/collections/$collectionId',
-)()
-const CollectionsNewLazyRouteImport = createFileRoute('/collections/new')()
-const CustomersIndexLazyRouteImport = createFileRoute('/customers/')()
-const CustomersCustomerIdLazyRouteImport = createFileRoute(
-  '/customers/$customerId',
-)()
-const DeliveriesIndexLazyRouteImport = createFileRoute('/deliveries/')()
-const DeliveriesNewLazyRouteImport = createFileRoute('/deliveries/new')()
-const InvoicesIndexLazyRouteImport = createFileRoute('/invoices/')()
+const InvoicesLazyRouteImport = createFileRoute('/invoices')()
+const DeliveriesLazyRouteImport = createFileRoute('/deliveries')()
+const CustomersLazyRouteImport = createFileRoute('/customers')()
+const CollectionsLazyRouteImport = createFileRoute('/collections')()
+const IndexLazyRouteImport = createFileRoute('/')()
 const PurchaseOrdersIndexLazyRouteImport =
   createFileRoute('/purchase-orders/')()
+const InvoicesIndexLazyRouteImport = createFileRoute('/invoices/')()
+const DeliveriesIndexLazyRouteImport = createFileRoute('/deliveries/')()
+const CustomersIndexLazyRouteImport = createFileRoute('/customers/')()
+const CollectionsIndexLazyRouteImport = createFileRoute('/collections/')()
 const PurchaseOrdersNewLazyRouteImport = createFileRoute(
   '/purchase-orders/new',
 )()
-const DeliveriesDeliveryIdIndexLazyRouteImport = createFileRoute(
-  '/deliveries/$deliveryId/',
+const DeliveriesNewLazyRouteImport = createFileRoute('/deliveries/new')()
+const CustomersCustomerIdLazyRouteImport = createFileRoute(
+  '/customers/$customerId',
 )()
-const DeliveriesDeliveryIdPdfLazyRouteImport = createFileRoute(
-  '/deliveries_/$deliveryId/pdf',
-)()
-const InvoicesInvoiceIdIndexLazyRouteImport = createFileRoute(
-  '/invoices/$invoiceId/',
-)()
-const InvoicesInvoiceIdOfficialReceiptLazyRouteImport = createFileRoute(
-  '/invoices_/$invoiceId/official-receipt',
-)()
-const InvoicesInvoiceIdPdfLazyRouteImport = createFileRoute(
-  '/invoices_/$invoiceId/pdf',
+const CollectionsNewLazyRouteImport = createFileRoute('/collections/new')()
+const CollectionsCollectionIdLazyRouteImport = createFileRoute(
+  '/collections/$collectionId',
 )()
 const PurchaseOrdersPurchaseOrderIdIndexLazyRouteImport = createFileRoute(
   '/purchase-orders/$purchaseOrderId/',
 )()
+const InvoicesInvoiceIdIndexLazyRouteImport = createFileRoute(
+  '/invoices/$invoiceId/',
+)()
+const DeliveriesDeliveryIdIndexLazyRouteImport = createFileRoute(
+  '/deliveries/$deliveryId/',
+)()
 const PurchaseOrdersPurchaseOrderIdPdfLazyRouteImport = createFileRoute(
   '/purchase-orders_/$purchaseOrderId/pdf',
+)()
+const InvoicesInvoiceIdPdfLazyRouteImport = createFileRoute(
+  '/invoices_/$invoiceId/pdf',
+)()
+const InvoicesInvoiceIdOfficialReceiptLazyRouteImport = createFileRoute(
+  '/invoices_/$invoiceId/official-receipt',
+)()
+const DeliveriesDeliveryIdPdfLazyRouteImport = createFileRoute(
+  '/deliveries_/$deliveryId/pdf',
 )()
 const CustomersCustomerIdStatementsPeriodLazyRouteImport = createFileRoute(
   '/customers_/$customerId/statements/$period',
 )()
 
-const IndexLazyRoute = IndexLazyRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any).lazy(() => import('./routes/index.lazy').then((d) => d.Route))
-const CollectionsLazyRoute = CollectionsLazyRouteImport.update({
-  id: '/collections',
-  path: '/collections',
-  getParentRoute: () => rootRouteImport,
-} as any).lazy(() => import('./routes/collections.lazy').then((d) => d.Route))
-const CustomersLazyRoute = CustomersLazyRouteImport.update({
-  id: '/customers',
-  path: '/customers',
-  getParentRoute: () => rootRouteImport,
-} as any).lazy(() => import('./routes/customers.lazy').then((d) => d.Route))
-const DeliveriesLazyRoute = DeliveriesLazyRouteImport.update({
-  id: '/deliveries',
-  path: '/deliveries',
-  getParentRoute: () => rootRouteImport,
-} as any).lazy(() => import('./routes/deliveries.lazy').then((d) => d.Route))
-const InvoicesLazyRoute = InvoicesLazyRouteImport.update({
-  id: '/invoices',
-  path: '/invoices',
-  getParentRoute: () => rootRouteImport,
-} as any).lazy(() => import('./routes/invoices.lazy').then((d) => d.Route))
 const PurchaseOrdersLazyRoute = PurchaseOrdersLazyRouteImport.update({
   id: '/purchase-orders',
   path: '/purchase-orders',
@@ -92,55 +67,37 @@ const PurchaseOrdersLazyRoute = PurchaseOrdersLazyRouteImport.update({
 } as any).lazy(() =>
   import('./routes/purchase-orders.lazy').then((d) => d.Route),
 )
-const CollectionsIndexLazyRoute = CollectionsIndexLazyRouteImport.update({
+const InvoicesLazyRoute = InvoicesLazyRouteImport.update({
+  id: '/invoices',
+  path: '/invoices',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() => import('./routes/invoices.lazy').then((d) => d.Route))
+const DeliveriesLazyRoute = DeliveriesLazyRouteImport.update({
+  id: '/deliveries',
+  path: '/deliveries',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() => import('./routes/deliveries.lazy').then((d) => d.Route))
+const CustomersLazyRoute = CustomersLazyRouteImport.update({
+  id: '/customers',
+  path: '/customers',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() => import('./routes/customers.lazy').then((d) => d.Route))
+const CollectionsLazyRoute = CollectionsLazyRouteImport.update({
+  id: '/collections',
+  path: '/collections',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() => import('./routes/collections.lazy').then((d) => d.Route))
+const IndexLazyRoute = IndexLazyRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => CollectionsLazyRoute,
-} as any).lazy(() =>
-  import('./routes/collections/index.lazy').then((d) => d.Route),
-)
-const CollectionsCollectionIdLazyRoute =
-  CollectionsCollectionIdLazyRouteImport.update({
-    id: '/$collectionId',
-    path: '/$collectionId',
-    getParentRoute: () => CollectionsLazyRoute,
-  } as any).lazy(() =>
-    import('./routes/collections/$collectionId.lazy').then((d) => d.Route),
-  )
-const CollectionsNewLazyRoute = CollectionsNewLazyRouteImport.update({
-  id: '/new',
-  path: '/new',
-  getParentRoute: () => CollectionsLazyRoute,
-} as any).lazy(() =>
-  import('./routes/collections/new.lazy').then((d) => d.Route),
-)
-const CustomersIndexLazyRoute = CustomersIndexLazyRouteImport.update({
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() => import('./routes/index.lazy').then((d) => d.Route))
+const PurchaseOrdersIndexLazyRoute = PurchaseOrdersIndexLazyRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => CustomersLazyRoute,
+  getParentRoute: () => PurchaseOrdersLazyRoute,
 } as any).lazy(() =>
-  import('./routes/customers/index.lazy').then((d) => d.Route),
-)
-const CustomersCustomerIdLazyRoute = CustomersCustomerIdLazyRouteImport.update({
-  id: '/$customerId',
-  path: '/$customerId',
-  getParentRoute: () => CustomersLazyRoute,
-} as any).lazy(() =>
-  import('./routes/customers/$customerId.lazy').then((d) => d.Route),
-)
-const DeliveriesIndexLazyRoute = DeliveriesIndexLazyRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => DeliveriesLazyRoute,
-} as any).lazy(() =>
-  import('./routes/deliveries/index.lazy').then((d) => d.Route),
-)
-const DeliveriesNewLazyRoute = DeliveriesNewLazyRouteImport.update({
-  id: '/new',
-  path: '/new',
-  getParentRoute: () => DeliveriesLazyRoute,
-} as any).lazy(() =>
-  import('./routes/deliveries/new.lazy').then((d) => d.Route),
+  import('./routes/purchase-orders/index.lazy').then((d) => d.Route),
 )
 const InvoicesIndexLazyRoute = InvoicesIndexLazyRouteImport.update({
   id: '/',
@@ -149,12 +106,26 @@ const InvoicesIndexLazyRoute = InvoicesIndexLazyRouteImport.update({
 } as any).lazy(() =>
   import('./routes/invoices/index.lazy').then((d) => d.Route),
 )
-const PurchaseOrdersIndexLazyRoute = PurchaseOrdersIndexLazyRouteImport.update({
+const DeliveriesIndexLazyRoute = DeliveriesIndexLazyRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => PurchaseOrdersLazyRoute,
+  getParentRoute: () => DeliveriesLazyRoute,
 } as any).lazy(() =>
-  import('./routes/purchase-orders/index.lazy').then((d) => d.Route),
+  import('./routes/deliveries/index.lazy').then((d) => d.Route),
+)
+const CustomersIndexLazyRoute = CustomersIndexLazyRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => CustomersLazyRoute,
+} as any).lazy(() =>
+  import('./routes/customers/index.lazy').then((d) => d.Route),
+)
+const CollectionsIndexLazyRoute = CollectionsIndexLazyRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => CollectionsLazyRoute,
+} as any).lazy(() =>
+  import('./routes/collections/index.lazy').then((d) => d.Route),
 )
 const PurchaseOrdersNewLazyRoute = PurchaseOrdersNewLazyRouteImport.update({
   id: '/new',
@@ -163,47 +134,34 @@ const PurchaseOrdersNewLazyRoute = PurchaseOrdersNewLazyRouteImport.update({
 } as any).lazy(() =>
   import('./routes/purchase-orders/new.lazy').then((d) => d.Route),
 )
-const DeliveriesDeliveryIdIndexLazyRoute =
-  DeliveriesDeliveryIdIndexLazyRouteImport.update({
-    id: '/$deliveryId/',
-    path: '/$deliveryId/',
-    getParentRoute: () => DeliveriesLazyRoute,
+const DeliveriesNewLazyRoute = DeliveriesNewLazyRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => DeliveriesLazyRoute,
+} as any).lazy(() =>
+  import('./routes/deliveries/new.lazy').then((d) => d.Route),
+)
+const CustomersCustomerIdLazyRoute = CustomersCustomerIdLazyRouteImport.update({
+  id: '/$customerId',
+  path: '/$customerId',
+  getParentRoute: () => CustomersLazyRoute,
+} as any).lazy(() =>
+  import('./routes/customers/$customerId.lazy').then((d) => d.Route),
+)
+const CollectionsNewLazyRoute = CollectionsNewLazyRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => CollectionsLazyRoute,
+} as any).lazy(() =>
+  import('./routes/collections/new.lazy').then((d) => d.Route),
+)
+const CollectionsCollectionIdLazyRoute =
+  CollectionsCollectionIdLazyRouteImport.update({
+    id: '/$collectionId',
+    path: '/$collectionId',
+    getParentRoute: () => CollectionsLazyRoute,
   } as any).lazy(() =>
-    import('./routes/deliveries/$deliveryId/index.lazy').then((d) => d.Route),
-  )
-const DeliveriesDeliveryIdPdfLazyRoute =
-  DeliveriesDeliveryIdPdfLazyRouteImport.update({
-    id: '/deliveries_/$deliveryId/pdf',
-    path: '/deliveries/$deliveryId/pdf',
-    getParentRoute: () => rootRouteImport,
-  } as any).lazy(() =>
-    import('./routes/deliveries_.$deliveryId.pdf.lazy').then((d) => d.Route),
-  )
-const InvoicesInvoiceIdIndexLazyRoute =
-  InvoicesInvoiceIdIndexLazyRouteImport.update({
-    id: '/$invoiceId/',
-    path: '/$invoiceId/',
-    getParentRoute: () => InvoicesLazyRoute,
-  } as any).lazy(() =>
-    import('./routes/invoices/$invoiceId/index.lazy').then((d) => d.Route),
-  )
-const InvoicesInvoiceIdOfficialReceiptLazyRoute =
-  InvoicesInvoiceIdOfficialReceiptLazyRouteImport.update({
-    id: '/invoices_/$invoiceId/official-receipt',
-    path: '/invoices/$invoiceId/official-receipt',
-    getParentRoute: () => rootRouteImport,
-  } as any).lazy(() =>
-    import('./routes/invoices_.$invoiceId.official-receipt.lazy').then(
-      (d) => d.Route,
-    ),
-  )
-const InvoicesInvoiceIdPdfLazyRoute =
-  InvoicesInvoiceIdPdfLazyRouteImport.update({
-    id: '/invoices_/$invoiceId/pdf',
-    path: '/invoices/$invoiceId/pdf',
-    getParentRoute: () => rootRouteImport,
-  } as any).lazy(() =>
-    import('./routes/invoices_.$invoiceId.pdf.lazy').then((d) => d.Route),
+    import('./routes/collections/$collectionId.lazy').then((d) => d.Route),
   )
 const PurchaseOrdersPurchaseOrderIdIndexLazyRoute =
   PurchaseOrdersPurchaseOrderIdIndexLazyRouteImport.update({
@@ -215,6 +173,22 @@ const PurchaseOrdersPurchaseOrderIdIndexLazyRoute =
       (d) => d.Route,
     ),
   )
+const InvoicesInvoiceIdIndexLazyRoute =
+  InvoicesInvoiceIdIndexLazyRouteImport.update({
+    id: '/$invoiceId/',
+    path: '/$invoiceId/',
+    getParentRoute: () => InvoicesLazyRoute,
+  } as any).lazy(() =>
+    import('./routes/invoices/$invoiceId/index.lazy').then((d) => d.Route),
+  )
+const DeliveriesDeliveryIdIndexLazyRoute =
+  DeliveriesDeliveryIdIndexLazyRouteImport.update({
+    id: '/$deliveryId/',
+    path: '/$deliveryId/',
+    getParentRoute: () => DeliveriesLazyRoute,
+  } as any).lazy(() =>
+    import('./routes/deliveries/$deliveryId/index.lazy').then((d) => d.Route),
+  )
 const PurchaseOrdersPurchaseOrderIdPdfLazyRoute =
   PurchaseOrdersPurchaseOrderIdPdfLazyRouteImport.update({
     id: '/purchase-orders_/$purchaseOrderId/pdf',
@@ -224,6 +198,32 @@ const PurchaseOrdersPurchaseOrderIdPdfLazyRoute =
     import('./routes/purchase-orders_.$purchaseOrderId.pdf.lazy').then(
       (d) => d.Route,
     ),
+  )
+const InvoicesInvoiceIdPdfLazyRoute =
+  InvoicesInvoiceIdPdfLazyRouteImport.update({
+    id: '/invoices_/$invoiceId/pdf',
+    path: '/invoices/$invoiceId/pdf',
+    getParentRoute: () => rootRouteImport,
+  } as any).lazy(() =>
+    import('./routes/invoices_.$invoiceId.pdf.lazy').then((d) => d.Route),
+  )
+const InvoicesInvoiceIdOfficialReceiptLazyRoute =
+  InvoicesInvoiceIdOfficialReceiptLazyRouteImport.update({
+    id: '/invoices_/$invoiceId/official-receipt',
+    path: '/invoices/$invoiceId/official-receipt',
+    getParentRoute: () => rootRouteImport,
+  } as any).lazy(() =>
+    import('./routes/invoices_.$invoiceId.official-receipt.lazy').then(
+      (d) => d.Route,
+    ),
+  )
+const DeliveriesDeliveryIdPdfLazyRoute =
+  DeliveriesDeliveryIdPdfLazyRouteImport.update({
+    id: '/deliveries_/$deliveryId/pdf',
+    path: '/deliveries/$deliveryId/pdf',
+    getParentRoute: () => rootRouteImport,
+  } as any).lazy(() =>
+    import('./routes/deliveries_.$deliveryId.pdf.lazy').then((d) => d.Route),
   )
 const CustomersCustomerIdStatementsPeriodLazyRoute =
   CustomersCustomerIdStatementsPeriodLazyRouteImport.update({
@@ -402,32 +402,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexLazyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/collections': {
-      id: '/collections'
-      path: '/collections'
-      fullPath: '/collections'
-      preLoaderRoute: typeof CollectionsLazyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/customers': {
-      id: '/customers'
-      path: '/customers'
-      fullPath: '/customers'
-      preLoaderRoute: typeof CustomersLazyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/deliveries': {
-      id: '/deliveries'
-      path: '/deliveries'
-      fullPath: '/deliveries'
-      preLoaderRoute: typeof DeliveriesLazyRouteImport
+    '/purchase-orders': {
+      id: '/purchase-orders'
+      path: '/purchase-orders'
+      fullPath: '/purchase-orders'
+      preLoaderRoute: typeof PurchaseOrdersLazyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/invoices': {
@@ -437,18 +416,95 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InvoicesLazyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/purchase-orders': {
-      id: '/purchase-orders'
-      path: '/purchase-orders'
-      fullPath: '/purchase-orders'
-      preLoaderRoute: typeof PurchaseOrdersLazyRouteImport
+    '/deliveries': {
+      id: '/deliveries'
+      path: '/deliveries'
+      fullPath: '/deliveries'
+      preLoaderRoute: typeof DeliveriesLazyRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/customers': {
+      id: '/customers'
+      path: '/customers'
+      fullPath: '/customers'
+      preLoaderRoute: typeof CustomersLazyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/collections': {
+      id: '/collections'
+      path: '/collections'
+      fullPath: '/collections'
+      preLoaderRoute: typeof CollectionsLazyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexLazyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/purchase-orders/': {
+      id: '/purchase-orders/'
+      path: '/'
+      fullPath: '/purchase-orders/'
+      preLoaderRoute: typeof PurchaseOrdersIndexLazyRouteImport
+      parentRoute: typeof PurchaseOrdersLazyRoute
+    }
+    '/invoices/': {
+      id: '/invoices/'
+      path: '/'
+      fullPath: '/invoices/'
+      preLoaderRoute: typeof InvoicesIndexLazyRouteImport
+      parentRoute: typeof InvoicesLazyRoute
+    }
+    '/deliveries/': {
+      id: '/deliveries/'
+      path: '/'
+      fullPath: '/deliveries/'
+      preLoaderRoute: typeof DeliveriesIndexLazyRouteImport
+      parentRoute: typeof DeliveriesLazyRoute
+    }
+    '/customers/': {
+      id: '/customers/'
+      path: '/'
+      fullPath: '/customers/'
+      preLoaderRoute: typeof CustomersIndexLazyRouteImport
+      parentRoute: typeof CustomersLazyRoute
     }
     '/collections/': {
       id: '/collections/'
       path: '/'
       fullPath: '/collections/'
       preLoaderRoute: typeof CollectionsIndexLazyRouteImport
+      parentRoute: typeof CollectionsLazyRoute
+    }
+    '/purchase-orders/new': {
+      id: '/purchase-orders/new'
+      path: '/new'
+      fullPath: '/purchase-orders/new'
+      preLoaderRoute: typeof PurchaseOrdersNewLazyRouteImport
+      parentRoute: typeof PurchaseOrdersLazyRoute
+    }
+    '/deliveries/new': {
+      id: '/deliveries/new'
+      path: '/new'
+      fullPath: '/deliveries/new'
+      preLoaderRoute: typeof DeliveriesNewLazyRouteImport
+      parentRoute: typeof DeliveriesLazyRoute
+    }
+    '/customers/$customerId': {
+      id: '/customers/$customerId'
+      path: '/$customerId'
+      fullPath: '/customers/$customerId'
+      preLoaderRoute: typeof CustomersCustomerIdLazyRouteImport
+      parentRoute: typeof CustomersLazyRoute
+    }
+    '/collections/new': {
+      id: '/collections/new'
+      path: '/new'
+      fullPath: '/collections/new'
+      preLoaderRoute: typeof CollectionsNewLazyRouteImport
       parentRoute: typeof CollectionsLazyRoute
     }
     '/collections/$collectionId': {
@@ -458,75 +514,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CollectionsCollectionIdLazyRouteImport
       parentRoute: typeof CollectionsLazyRoute
     }
-    '/collections/new': {
-      id: '/collections/new'
-      path: '/new'
-      fullPath: '/collections/new'
-      preLoaderRoute: typeof CollectionsNewLazyRouteImport
-      parentRoute: typeof CollectionsLazyRoute
-    }
-    '/customers/': {
-      id: '/customers/'
-      path: '/'
-      fullPath: '/customers/'
-      preLoaderRoute: typeof CustomersIndexLazyRouteImport
-      parentRoute: typeof CustomersLazyRoute
-    }
-    '/customers/$customerId': {
-      id: '/customers/$customerId'
-      path: '/$customerId'
-      fullPath: '/customers/$customerId'
-      preLoaderRoute: typeof CustomersCustomerIdLazyRouteImport
-      parentRoute: typeof CustomersLazyRoute
-    }
-    '/deliveries/': {
-      id: '/deliveries/'
-      path: '/'
-      fullPath: '/deliveries/'
-      preLoaderRoute: typeof DeliveriesIndexLazyRouteImport
-      parentRoute: typeof DeliveriesLazyRoute
-    }
-    '/deliveries/new': {
-      id: '/deliveries/new'
-      path: '/new'
-      fullPath: '/deliveries/new'
-      preLoaderRoute: typeof DeliveriesNewLazyRouteImport
-      parentRoute: typeof DeliveriesLazyRoute
-    }
-    '/invoices/': {
-      id: '/invoices/'
-      path: '/'
-      fullPath: '/invoices/'
-      preLoaderRoute: typeof InvoicesIndexLazyRouteImport
-      parentRoute: typeof InvoicesLazyRoute
-    }
-    '/purchase-orders/': {
-      id: '/purchase-orders/'
-      path: '/'
-      fullPath: '/purchase-orders/'
-      preLoaderRoute: typeof PurchaseOrdersIndexLazyRouteImport
+    '/purchase-orders/$purchaseOrderId/': {
+      id: '/purchase-orders/$purchaseOrderId/'
+      path: '/$purchaseOrderId'
+      fullPath: '/purchase-orders/$purchaseOrderId/'
+      preLoaderRoute: typeof PurchaseOrdersPurchaseOrderIdIndexLazyRouteImport
       parentRoute: typeof PurchaseOrdersLazyRoute
-    }
-    '/purchase-orders/new': {
-      id: '/purchase-orders/new'
-      path: '/new'
-      fullPath: '/purchase-orders/new'
-      preLoaderRoute: typeof PurchaseOrdersNewLazyRouteImport
-      parentRoute: typeof PurchaseOrdersLazyRoute
-    }
-    '/deliveries/$deliveryId/': {
-      id: '/deliveries/$deliveryId/'
-      path: '/$deliveryId'
-      fullPath: '/deliveries/$deliveryId/'
-      preLoaderRoute: typeof DeliveriesDeliveryIdIndexLazyRouteImport
-      parentRoute: typeof DeliveriesLazyRoute
-    }
-    '/deliveries_/$deliveryId/pdf': {
-      id: '/deliveries_/$deliveryId/pdf'
-      path: '/deliveries/$deliveryId/pdf'
-      fullPath: '/deliveries/$deliveryId/pdf'
-      preLoaderRoute: typeof DeliveriesDeliveryIdPdfLazyRouteImport
-      parentRoute: typeof rootRouteImport
     }
     '/invoices/$invoiceId/': {
       id: '/invoices/$invoiceId/'
@@ -535,11 +528,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InvoicesInvoiceIdIndexLazyRouteImport
       parentRoute: typeof InvoicesLazyRoute
     }
-    '/invoices_/$invoiceId/official-receipt': {
-      id: '/invoices_/$invoiceId/official-receipt'
-      path: '/invoices/$invoiceId/official-receipt'
-      fullPath: '/invoices/$invoiceId/official-receipt'
-      preLoaderRoute: typeof InvoicesInvoiceIdOfficialReceiptLazyRouteImport
+    '/deliveries/$deliveryId/': {
+      id: '/deliveries/$deliveryId/'
+      path: '/$deliveryId'
+      fullPath: '/deliveries/$deliveryId/'
+      preLoaderRoute: typeof DeliveriesDeliveryIdIndexLazyRouteImport
+      parentRoute: typeof DeliveriesLazyRoute
+    }
+    '/purchase-orders_/$purchaseOrderId/pdf': {
+      id: '/purchase-orders_/$purchaseOrderId/pdf'
+      path: '/purchase-orders/$purchaseOrderId/pdf'
+      fullPath: '/purchase-orders/$purchaseOrderId/pdf'
+      preLoaderRoute: typeof PurchaseOrdersPurchaseOrderIdPdfLazyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/invoices_/$invoiceId/pdf': {
@@ -549,18 +549,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InvoicesInvoiceIdPdfLazyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/purchase-orders/$purchaseOrderId/': {
-      id: '/purchase-orders/$purchaseOrderId/'
-      path: '/$purchaseOrderId'
-      fullPath: '/purchase-orders/$purchaseOrderId/'
-      preLoaderRoute: typeof PurchaseOrdersPurchaseOrderIdIndexLazyRouteImport
-      parentRoute: typeof PurchaseOrdersLazyRoute
+    '/invoices_/$invoiceId/official-receipt': {
+      id: '/invoices_/$invoiceId/official-receipt'
+      path: '/invoices/$invoiceId/official-receipt'
+      fullPath: '/invoices/$invoiceId/official-receipt'
+      preLoaderRoute: typeof InvoicesInvoiceIdOfficialReceiptLazyRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/purchase-orders_/$purchaseOrderId/pdf': {
-      id: '/purchase-orders_/$purchaseOrderId/pdf'
-      path: '/purchase-orders/$purchaseOrderId/pdf'
-      fullPath: '/purchase-orders/$purchaseOrderId/pdf'
-      preLoaderRoute: typeof PurchaseOrdersPurchaseOrderIdPdfLazyRouteImport
+    '/deliveries_/$deliveryId/pdf': {
+      id: '/deliveries_/$deliveryId/pdf'
+      path: '/deliveries/$deliveryId/pdf'
+      fullPath: '/deliveries/$deliveryId/pdf'
+      preLoaderRoute: typeof DeliveriesDeliveryIdPdfLazyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/customers_/$customerId/statements/$period': {
