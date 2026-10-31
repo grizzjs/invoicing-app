@@ -8,6 +8,7 @@
 
 export * from './buffer';
 export * from './collectionDto';
+export * from './createCollectionDto';
 export * from './createCustomerDto';
 export * from './createDeliveryReceiptDto';
 export * from './createDeliveryReceiptDtoPurchaseOrder';

@@ -6,22 +6,27 @@
  * OpenAPI spec version: 1.0
  */
 import {
+  useMutation,
   useQuery
 } from '@tanstack/react-query';
 import type {
   DataTag,
   DefinedInitialDataOptions,
   DefinedUseQueryResult,
+  MutationFunction,
   QueryClient,
   QueryFunction,
   QueryKey,
   UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult
 } from '@tanstack/react-query';
 
 import type {
   CollectionDto,
+  CreateCollectionDto,
   GetCollectionsParams
 } from '../../models';
 
@@ -117,7 +122,64 @@ export function useGetCollections<TData = Awaited<ReturnType<typeof getCollectio
 
 
 
-export const getCollection = (
+export const createCollection = (
+    createCollectionDto: CreateCollectionDto,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<CollectionDto>(
+      {url: `/collections`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: createCollectionDto, signal
+    },
+      );
+    }
+
+
+
+export const getCreateCollectionMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createCollection>>, TError,{data: CreateCollectionDto}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof createCollection>>, TError,{data: CreateCollectionDto}, TContext> => {
+
+const mutationKey = ['createCollection'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createCollection>>, {data: CreateCollectionDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createCollection(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateCollectionMutationResult = NonNullable<Awaited<ReturnType<typeof createCollection>>>
+    export type CreateCollectionMutationBody = CreateCollectionDto
+    export type CreateCollectionMutationError = unknown
+
+    export const useCreateCollection = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createCollection>>, TError,{data: CreateCollectionDto}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createCollection>>,
+        TError,
+        {data: CreateCollectionDto},
+        TContext
+      > => {
+      return useMutation(getCreateCollectionMutationOptions(options), queryClient);
+    }
+    export const getCollection = (
     id: number,
  signal?: AbortSignal
 ) => {
