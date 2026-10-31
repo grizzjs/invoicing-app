@@ -1,5 +1,5 @@
 import { useGetPurchaseOrders } from "@/api/endpoints/purchase-orders/purchase-orders";
-import type { PurchaseOrderDto } from "@/api/models";
+import type { PurchaseOrderDto, PurchaseOrderLineItemDto } from "@/api/models";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -35,6 +35,10 @@ const blankValues: PurchaseOrderFormValues = {
 const registerFormOpts = formOptions({
   defaultValues: blankValues,
 });
+
+const remainingQuantity = (item: PurchaseOrderLineItemDto) =>
+  item.quantity -
+  item.deliveries.reduce((res, current) => res + current.quantity, 0);
 
 interface PurchaseOrderDialogProps {
   open: boolean;
@@ -106,8 +110,11 @@ function PurchaseOrderForm({
 
   const selectablePurchaseOrders = purchaseOrder
     ? [purchaseOrder]
-    : purchaseOrders.filter((po) =>
-        ["Approved", "Pending"].includes(po.status),
+    : purchaseOrders.filter(
+        (po) =>
+          ["Approved", "Pending"].includes(po.status) &&
+          // Hide orders whose items have all been delivered already.
+          po.lineItems.some((item) => remainingQuantity(item) > 0),
       );
 
   const items = (
@@ -116,12 +123,7 @@ function PurchaseOrderForm({
           return po.id.toString() == selectedPurchaseOrder;
         }).lineItems ?? [])
       : []
-  ).filter(
-    (item) =>
-      item.quantity -
-        item.deliveries.reduce((res, current) => res + current.quantity, 0) >
-      0,
-  );
+  ).filter((item) => remainingQuantity(item) > 0);
 
   return (
     <div className="flex flex-col gap-4 py-2">
@@ -212,13 +214,9 @@ function PurchaseOrderForm({
                                   id={item.id}
                                   label={item.name}
                                   getLabel={() => item.name}
-                                  description={`${
-                                    item.quantity -
-                                    item.deliveries.reduce(
-                                      (res, current) => res + current.quantity,
-                                      0,
-                                    )
-                                  } units remaining`}
+                                  description={`${remainingQuantity(
+                                    item,
+                                  )} units remaining`}
                                 />
                               );
                             }}
