@@ -11,5 +11,5 @@ export default function format(value: string) {
     return `${tin.slice(0, 3)}-${tin.slice(3, 6)}-${tin.slice(6, 9)}`;
   }
 
-  return `${tin.slice(0, 3)}-${tin.slice(3, 6)}-${tin.slice(6, 9)}-${tin.slice(9, 13)}`;
+  return `${tin.slice(0, 3)}-${tin.slice(3, 6)}-${tin.slice(6, 9)}-${tin.slice(9, 14)}`;
 }

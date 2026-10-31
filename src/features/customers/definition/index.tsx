@@ -1,7 +1,6 @@
-import { Button } from "@/components/ui/button";
 import { Link } from "@tanstack/react-router";
 import { type ColumnDef } from "@tanstack/react-table";
-import { Pencil, Printer } from "lucide-react";
+import { CustomerRowActions } from "../components/customer-row-actions";
 
 export type Customer = {
   id: number;
@@ -47,17 +46,8 @@ export const columns: ColumnDef<Customer>[] = [
   },
   {
     id: "actions",
-    cell: () => {
-      return (
-        <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon" className="h-8 w-8">
-            <Printer size={15} />
-          </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8">
-            <Pencil size={15} />
-          </Button>
-        </div>
-      );
+    cell: ({ row }) => {
+      return <CustomerRowActions customer={row.original} />;
     },
   },
 ];
