@@ -93,8 +93,10 @@ export function HeaderActionsGroup({ purchaseOrder }: HeaderActionsGroupProps) {
       <div className="h-5 w-px bg-gray-300" />
       <HeaderActions>
         {isIn([Status.Draft, Status.Finalized], purchaseOrder.status) && (
-          <Button variant="outline">
-            <Pencil /> Edit
+          <Button variant="outline" asChild>
+            <Link to={`edit`}>
+              <Pencil /> Edit
+            </Link>
           </Button>
         )}
 

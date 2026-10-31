@@ -29,6 +29,7 @@ export default function CustomerSelect({
   customers,
   orientation = "vertical",
   className = "",
+  disabled = false,
   onChange,
 }: {
   label: string;
@@ -37,9 +38,10 @@ export default function CustomerSelect({
   customers: CustomerDto[];
   orientation?: "horizontal" | "vertical";
   className?: string;
+  disabled?: boolean;
   onChange?: (value) => void;
 }) {
-  const field = useFieldContext<string>();
+  const field = useFieldContext<{ id: number }>();
   const { isInvalid, message: errorMessage } = getFieldError(field.state.meta);
   return (
     <Field orientation={orientation} className={className}>
@@ -50,6 +52,7 @@ export default function CustomerSelect({
         {label}
       </FieldLabel>
       <Combobox
+        disabled={disabled}
         items={customers}
         itemToStringValue={(customer: (typeof customers)[number]) =>
           `${customer.id}`
@@ -61,10 +64,15 @@ export default function CustomerSelect({
 
           onChange(value);
         }}
+        value={
+          customers.find((customer) => customer.id === field.state.value?.id) ??
+          null
+        }
       >
         <ComboboxInput
           placeholder="Search customer..."
           onBlur={field.handleBlur}
+          disabled={disabled}
           className="w-full"
         />
         <ComboboxContent>
