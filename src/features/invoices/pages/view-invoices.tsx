@@ -110,9 +110,11 @@ export default function ViewInvoicesPage() {
               {formatDate("2026-01-01T00:00:00Z")}
             </Value>
             <Key>Collection Number</Key>
-            <Link to={`/collections/${1}`}>
+            <Link to={`/collections/${invoice.collection?.id}`}>
               <span className="underline">
-                <Value className="justify-self-end">1</Value>
+                <Value className="justify-self-end">
+                  {invoice.collection?.id}
+                </Value>
               </span>
             </Link>
           </div>
