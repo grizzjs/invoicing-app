@@ -5,6 +5,7 @@ import {
 import type { PurchaseOrderDto } from "@/api/models";
 import { Button } from "@/components/ui/button";
 import { HeaderActions } from "@/components/ui/header-actions";
+import PurchaseOrderDialog from "@/features/deliveries/components/purchase-order-dialog";
 import isIn from "@/lib/is-in";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
@@ -25,6 +26,13 @@ export function HeaderActionsGroup({ purchaseOrder }: HeaderActionsGroupProps) {
   const queryClient = useQueryClient();
   const [confirming, setConfirming] = useState<"approve" | "cancel" | null>(
     null,
+  );
+  const [creatingDelivery, setCreatingDelivery] = useState(false);
+
+  const fullyDelivered = purchaseOrder.lineItems.every(
+    (lineItem) =>
+      lineItem.deliveries.reduce((res, current) => res + current.quantity, 0) >=
+      lineItem.quantity,
   );
 
   const onSuccess = () => {
@@ -63,8 +71,10 @@ export function HeaderActionsGroup({ purchaseOrder }: HeaderActionsGroupProps) {
             Cancel Order
           </Button>
         )}
-        {isIn([Status.Approved], purchaseOrder.status) && (
-          <Button variant="outline">Create Delivery Receipt</Button>
+        {isIn([Status.Approved], purchaseOrder.status) && !fullyDelivered && (
+          <Button variant="outline" onClick={() => setCreatingDelivery(true)}>
+            Create Delivery Receipt
+          </Button>
         )}
         {isIn([Status.Pending], purchaseOrder.status) && (
           <Button variant="outline">Create Sales Invoice</Button>
@@ -105,6 +115,11 @@ export function HeaderActionsGroup({ purchaseOrder }: HeaderActionsGroupProps) {
         confirmVariant="destructive"
         isPending={isCancelling}
         onConfirm={cancel}
+      />
+      <PurchaseOrderDialog
+        open={creatingDelivery}
+        onOpenChange={setCreatingDelivery}
+        purchaseOrder={purchaseOrder}
       />
     </>
   );
