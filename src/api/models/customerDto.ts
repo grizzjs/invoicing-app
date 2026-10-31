@@ -20,6 +20,8 @@ export interface CustomerDto {
   email: string;
   /** Taxpayer Identification Number of the customer */
   tin: string;
+  /** Notes for this customer */
+  notes: string;
   /** Outstanding invoices of the customer */
   invoices: InvoiceDto[];
 }

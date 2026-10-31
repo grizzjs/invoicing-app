@@ -12,6 +12,8 @@ import type { CreatePurchaseOrderLineItemDto } from './createPurchaseOrderLineIt
 export interface CreatePurchaseOrderDto {
   /** Status of the purchase order */
   status: CreatePurchaseOrderDtoStatus;
+  /** Notes for this purchase order */
+  notes: string;
   /** Customer associated with the purchase order */
   customer: CreatePurchaseOrderDtoCustomer;
   /** Date the purchase order was created */

@@ -3,7 +3,10 @@ import {
   deletePurchaseOrderLineItem,
   updatePurchaseOrderLineItem,
 } from "@/api/endpoints/line-items/line-items";
-import { useGetPurchaseOrder } from "@/api/endpoints/purchase-orders/purchase-orders";
+import {
+  updatePurchaseOrder,
+  useGetPurchaseOrder,
+} from "@/api/endpoints/purchase-orders/purchase-orders";
 import { Header } from "@/components/ui/header";
 import isIn from "@/lib/is-in";
 import { useQueryClient } from "@tanstack/react-query";
@@ -31,11 +34,16 @@ export default function EditPurchaseOrderPage() {
   const viewPath = `/purchase-orders/${purchaseOrder.id}`;
   const { customer } = purchaseOrder;
 
-  // Line items are saved through the line item endpoints: removed rows are
-  // deleted, existing rows updated and new rows created.
-  const save = async ({ lineItems }: PurchaseOrderFormValues) => {
+  // Notes are saved on the purchase order itself. Line items are saved through
+  // the line item endpoints: removed rows are deleted, existing rows updated
+  // and new rows created.
+  const save = async ({ notes, lineItems }: PurchaseOrderFormValues) => {
     const keptIds = lineItems.map((lineItem) => lineItem.id);
     await Promise.all([
+      updatePurchaseOrder(purchaseOrder.id, {
+        status: purchaseOrder.status,
+        notes,
+      }),
       ...purchaseOrder.lineItems
         .filter((lineItem) => !keptIds.includes(lineItem.id))
         .map((lineItem) =>
@@ -72,6 +80,7 @@ export default function EditPurchaseOrderPage() {
             phoneNumber: customer.phoneNumber,
             email: customer.email,
             tin: customer.tin,
+            notes: purchaseOrder.notes ?? "",
             lineItems: purchaseOrder.lineItems.map((lineItem) => ({
               id: lineItem.id,
               name: lineItem.name,

@@ -11,6 +11,8 @@ export interface CreateInvoiceDto {
   createDate: string;
   /** The number of days the invoice will be due. */
   dueInDays: number;
+  /** Notes for this invoice */
+  notes: string;
   /** Delivery receipts associated with the invoice */
   deliveryReceipts: number[];
 }

@@ -10,4 +10,6 @@ import type { UpdatePurchaseOrderDtoStatus } from './updatePurchaseOrderDtoStatu
 export interface UpdatePurchaseOrderDto {
   /** Status of the purchase order */
   status: UpdatePurchaseOrderDtoStatus;
+  /** Notes for this purchase order */
+  notes: string;
 }

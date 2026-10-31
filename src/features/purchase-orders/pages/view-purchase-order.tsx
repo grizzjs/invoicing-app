@@ -107,6 +107,7 @@ export default function ViewPurchaseOrderPage() {
               value={formatDate(purchaseOrder.createDate)}
             />
             <DetailProperty header="Attachment" value="3 Files" />
+            <DetailProperty header="Notes" value={purchaseOrder.notes || "-"} />
           </DetailsCard>
           <CustomerCard customer={purchaseOrder.customer} />
         </div>
