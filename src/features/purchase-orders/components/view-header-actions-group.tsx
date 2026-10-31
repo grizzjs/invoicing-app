@@ -5,6 +5,7 @@ import {
 import type { PurchaseOrderDto } from "@/api/models";
 import { Button } from "@/components/ui/button";
 import { HeaderActions } from "@/components/ui/header-actions";
+import PurchaseOrderDialog from "@/features/deliveries/components/purchase-order-dialog";
 import isIn from "@/lib/is-in";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
@@ -18,13 +19,22 @@ type HeaderActionsGroupProps = {
 };
 
 export function HeaderActionsGroup({ purchaseOrder }: HeaderActionsGroupProps) {
+  const { mutate: finalizePurchaseOrder, isPending: isFinalizing } =
+    useUpdatePurchaseOrder();
   const { mutate: approvePurchaseOrder, isPending: isApproving } =
     useUpdatePurchaseOrder();
   const { mutate: cancelPurchaseOrder, isPending: isCancelling } =
     useUpdatePurchaseOrder();
   const queryClient = useQueryClient();
-  const [confirming, setConfirming] = useState<"approve" | "cancel" | null>(
-    null,
+  const [confirming, setConfirming] = useState<
+    "finalize" | "approve" | "cancel" | null
+  >(null);
+  const [creatingDelivery, setCreatingDelivery] = useState(false);
+
+  const fullyDelivered = purchaseOrder.lineItems.every(
+    (lineItem) =>
+      lineItem.deliveries.reduce((res, current) => res + current.quantity, 0) >=
+      lineItem.quantity,
   );
 
   const onSuccess = () => {
@@ -34,6 +44,12 @@ export function HeaderActionsGroup({ purchaseOrder }: HeaderActionsGroupProps) {
     });
     setConfirming(null);
   };
+
+  const finalize = () =>
+    finalizePurchaseOrder(
+      { id: purchaseOrder.id, data: { status: Status.Finalized } },
+      { onSuccess },
+    );
 
   const approve = () =>
     approvePurchaseOrder(
@@ -51,7 +67,9 @@ export function HeaderActionsGroup({ purchaseOrder }: HeaderActionsGroupProps) {
     <>
       <HeaderActions>
         {isIn([Status.Draft], purchaseOrder.status) && (
-          <Button>Finalize Order</Button>
+          <Button onClick={() => setConfirming("finalize")}>
+            Finalize Order
+          </Button>
         )}
         {isIn([Status.Finalized], purchaseOrder.status) && (
           <Button onClick={() => setConfirming("approve")}>
@@ -63,8 +81,10 @@ export function HeaderActionsGroup({ purchaseOrder }: HeaderActionsGroupProps) {
             Cancel Order
           </Button>
         )}
-        {isIn([Status.Approved], purchaseOrder.status) && (
-          <Button variant="outline">Create Delivery Receipt</Button>
+        {isIn([Status.Approved], purchaseOrder.status) && !fullyDelivered && (
+          <Button variant="outline" onClick={() => setCreatingDelivery(true)}>
+            Create Delivery Receipt
+          </Button>
         )}
         {isIn([Status.Pending], purchaseOrder.status) && (
           <Button variant="outline">Create Sales Invoice</Button>
@@ -86,6 +106,16 @@ export function HeaderActionsGroup({ purchaseOrder }: HeaderActionsGroupProps) {
       </HeaderActions>
 
       <ConfirmDialog
+        open={confirming === "finalize"}
+        onOpenChange={(open) => !open && setConfirming(null)}
+        title="Finalize Order"
+        description={`Finalize purchase order #${purchaseOrder.id}? It will be ready for approval.`}
+        confirmLabel="Finalize Order"
+        pendingLabel="Finalizing..."
+        isPending={isFinalizing}
+        onConfirm={finalize}
+      />
+      <ConfirmDialog
         open={confirming === "approve"}
         onOpenChange={(open) => !open && setConfirming(null)}
         title="Approve Order"
@@ -105,6 +135,11 @@ export function HeaderActionsGroup({ purchaseOrder }: HeaderActionsGroupProps) {
         confirmVariant="destructive"
         isPending={isCancelling}
         onConfirm={cancel}
+      />
+      <PurchaseOrderDialog
+        open={creatingDelivery}
+        onOpenChange={setCreatingDelivery}
+        purchaseOrder={purchaseOrder}
       />
     </>
   );

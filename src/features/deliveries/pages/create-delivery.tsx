@@ -198,8 +198,11 @@ export default function CreateDeliveryPage() {
                     className="text-base font-medium  text-gray-400"
                     asChild
                   >
-                    <Link to={`/purchase-orders/${`1`}`} target="_blank">
-                      {1}{" "}
+                    <Link
+                      to={`/purchase-orders/${purchaseOrderId}`}
+                      target="_blank"
+                    >
+                      {purchaseOrderId}{" "}
                       <SquareArrowOutUpRight className="h-4 w-4 text-gray-500" />
                     </Link>
                   </FieldLabel>

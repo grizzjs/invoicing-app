@@ -1,4 +1,5 @@
 import { useGetPurchaseOrders } from "@/api/endpoints/purchase-orders/purchase-orders";
+import type { PurchaseOrderDto } from "@/api/models";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -38,12 +39,14 @@ const registerFormOpts = formOptions({
 interface PurchaseOrderDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  defaultValues?: Partial<PurchaseOrderFormValues>;
+  // When set, this purchase order is preselected and cannot be changed.
+  purchaseOrder?: PurchaseOrderDto;
 }
 
 export default function PurchaseOrderDialog({
   open,
   onOpenChange,
+  purchaseOrder,
 }: PurchaseOrderDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -55,18 +58,36 @@ export default function PurchaseOrderDialog({
         </DialogHeader>
         {/* Rendered inside DialogContent so the form remounts on every open,
             which re-runs onMount validation with fresh values. */}
-        <PurchaseOrderForm onClose={() => onOpenChange(false)} />
+        <PurchaseOrderForm
+          purchaseOrder={purchaseOrder}
+          onClose={() => onOpenChange(false)}
+        />
       </DialogContent>
     </Dialog>
   );
 }
 
-function PurchaseOrderForm({ onClose }: { onClose: () => void }) {
-  const { data: purchaseOrders, isLoading } = useGetPurchaseOrders();
+function PurchaseOrderForm({
+  purchaseOrder,
+  onClose,
+}: {
+  purchaseOrder?: PurchaseOrderDto;
+  onClose: () => void;
+}) {
+  const { data: purchaseOrders, isLoading } = useGetPurchaseOrders(undefined, {
+    query: { enabled: !purchaseOrder },
+  });
 
   const navigate = useNavigate();
   const form = useAppForm({
     ...registerFormOpts,
+    defaultValues: purchaseOrder
+      ? {
+          ...blankValues,
+          purchaseOrderId: purchaseOrder.id,
+          customerId: purchaseOrder.customer.id,
+        }
+      : blankValues,
     onSubmit: ({ value }) => {
       const processed = schema.parse(value);
       navigate({ to: "/deliveries/new", state: processed });
@@ -77,14 +98,21 @@ function PurchaseOrderForm({ onClose }: { onClose: () => void }) {
     },
   });
 
-  const [selectedPurchaseOrder, setSelectedPurchaseOrder] =
-    useState<string>("");
+  const [selectedPurchaseOrder, setSelectedPurchaseOrder] = useState<string>(
+    purchaseOrder?.id.toString() ?? "",
+  );
 
   if (isLoading) return <div>Loading...</div>;
 
+  const selectablePurchaseOrders = purchaseOrder
+    ? [purchaseOrder]
+    : purchaseOrders.filter((po) =>
+        ["Approved", "Pending"].includes(po.status),
+      );
+
   const items = (
     selectedPurchaseOrder
-      ? (purchaseOrders.find((po) => {
+      ? (selectablePurchaseOrders.find((po) => {
           return po.id.toString() == selectedPurchaseOrder;
         }).lineItems ?? [])
       : []
@@ -111,9 +139,8 @@ function PurchaseOrderForm({ onClose }: { onClose: () => void }) {
                   <field.SelectPurchaseOrder
                     id="purchaseOrderId"
                     label="Purchase Order Number"
-                    purchaseOrders={purchaseOrders.filter((purchaseOrder) =>
-                      ["Approved", "Pending"].includes(purchaseOrder.status),
-                    )}
+                    purchaseOrders={selectablePurchaseOrders}
+                    disabled={!!purchaseOrder}
                     onChange={(value) => {
                       setSelectedPurchaseOrder(value.id);
                       form.setFieldValue("customerId", value.customer.id);
@@ -134,7 +161,6 @@ function PurchaseOrderForm({ onClose }: { onClose: () => void }) {
                       >
                         Purchase Order Items
                       </FieldLabel>
-                      ;
                       {selectedPurchaseOrder && (
                         <Button
                           variant="outline"
@@ -170,7 +196,16 @@ function PurchaseOrderForm({ onClose }: { onClose: () => void }) {
                     <div>
                       {items.map((item, i) => {
                         return (
-                          <form.AppField name={`ids[${i}]`} key={i}>
+                          <form.AppField
+                            name={`ids[${i}]`}
+                            key={i}
+                            // Toggling an item only changes ids[i], so re-run
+                            // mount validation to clear the "ids" error left
+                            // over from mounting with a preselected order.
+                            listeners={{
+                              onChange: () => form.validate("mount"),
+                            }}
+                          >
                             {(field) => {
                               return (
                                 <field.CheckBox

@@ -30,6 +30,7 @@ export default function PurchaseOrderSelect({
   orientation = "vertical",
   className = "",
   hideLabel = false,
+  disabled = false,
   onChange = () => {},
 }: {
   label: string;
@@ -39,6 +40,7 @@ export default function PurchaseOrderSelect({
   orientation?: "horizontal" | "vertical";
   className?: string;
   hideLabel?: boolean;
+  disabled?: boolean;
   onChange?: (value) => void;
 }) {
   const field = useFieldContext<number>();
@@ -57,6 +59,7 @@ export default function PurchaseOrderSelect({
         </FieldLabel>
       )}
       <Combobox
+        disabled={disabled}
         items={purchaseOrders
           .filter((purchaseOrder) =>
             purchaseOrder.id.toString().includes(search),
@@ -79,6 +82,7 @@ export default function PurchaseOrderSelect({
           onBlur={field.handleBlur}
           // value={search}
           onChange={(e) => setSearch(e.target.value)}
+          disabled={disabled}
           className="w-full"
         />
         <ComboboxContent>

@@ -4,7 +4,7 @@ import format from "@/lib/format-money";
 import { parseDateFromFormat } from "@/lib/parse-date";
 import { Link } from "@tanstack/react-router";
 import { type ColumnDef } from "@tanstack/react-table";
-import { Pencil } from "lucide-react";
+import { Printer } from "lucide-react";
 import entityToBadge from "../lib/entity-to-badge";
 
 export type PurchaseOrder = {
@@ -89,10 +89,16 @@ export const columns: ColumnDef<PurchaseOrder>[] = [
   },
   {
     id: "actions",
-    cell: () => {
+    cell: ({ row }) => {
       return (
-        <Button variant="ghost" size="icon" className="h-8 w-8">
-          <Pencil size={15} />
+        <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
+          <Link
+            to={`/purchase-orders/${row.original.id}/pdf`}
+            target="_blank"
+            aria-label={`Print purchase order #${row.original.id}`}
+          >
+            <Printer size={15} />
+          </Link>
         </Button>
       );
     },
