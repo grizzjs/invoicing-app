@@ -20,6 +20,11 @@ export interface DeliveryReceiptDto {
   status: DeliveryReceiptDtoStatus;
   /** Purchase order associated with the delivery receipt */
   purchaseOrder: PurchaseOrderDto;
+  /**
+     * Notes for this delivery receipt
+     * @nullable
+     */
+  notes: string | null;
   /** Status changes in the delivery receipt */
   states: DeliveryStateDto[];
   /** Delivery receipt line items */

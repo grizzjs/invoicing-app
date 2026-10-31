@@ -15,6 +15,11 @@ export interface PurchaseOrderDto {
   id: number;
   /** Status of the purchase order */
   status: PurchaseOrderDtoStatus;
+  /**
+     * Notes for this purchase order
+     * @nullable
+     */
+  notes?: string | null;
   /** Customer associated with the purchase order */
   customer: CustomerDto;
   /** Date the purchase order was created */

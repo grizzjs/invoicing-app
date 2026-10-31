@@ -5,6 +5,7 @@
  * The invoicing API description
  * OpenAPI spec version: 1.0
  */
+import type { CollectionDto } from './collectionDto';
 import type { CustomerDto } from './customerDto';
 import type { DeliveryReceiptDto } from './deliveryReceiptDto';
 import type { InvoiceDtoStatus } from './invoiceDtoStatus';
@@ -25,8 +26,15 @@ export interface InvoiceDto {
   amount: number;
   /** The official receipt number of the invoice */
   officialReceipt: number;
+  /**
+     * Notes for this invoice
+     * @nullable
+     */
+  notes: string | null;
   /** Customer associated with the invoice */
   customer: CustomerDto;
   /** Delivery receipts associated with the invoice */
   deliveryReceipts: DeliveryReceiptDto[];
+  /** Collection associated with the invoice */
+  collection: CollectionDto;
 }
