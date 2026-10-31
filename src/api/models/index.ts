@@ -6,6 +6,7 @@
  * OpenAPI spec version: 1.0
  */
 
+export * from './buffer';
 export * from './collectionDto';
 export * from './createCustomerDto';
 export * from './createDeliveryReceiptDto';

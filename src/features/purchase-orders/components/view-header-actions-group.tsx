@@ -1,16 +1,52 @@
+import {
+  getGetPurchaseOrderQueryKey,
+  useUpdatePurchaseOrder,
+} from "@/api/endpoints/purchase-orders/purchase-orders";
 import type { PurchaseOrderDto } from "@/api/models";
 import { Button } from "@/components/ui/button";
 import { HeaderActions } from "@/components/ui/header-actions";
 import isIn from "@/lib/is-in";
+import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { Pencil, Printer } from "lucide-react";
+import { useState } from "react";
 import Status from "../enum";
+import ConfirmDialog from "./confirm-dialog";
 
 type HeaderActionsGroupProps = {
   purchaseOrder: PurchaseOrderDto;
 };
 
 export function HeaderActionsGroup({ purchaseOrder }: HeaderActionsGroupProps) {
+  const { mutate: approvePurchaseOrder, isPending: isApproving } =
+    useUpdatePurchaseOrder();
+  const { mutate: cancelPurchaseOrder, isPending: isCancelling } =
+    useUpdatePurchaseOrder();
+  const queryClient = useQueryClient();
+  const [confirming, setConfirming] = useState<"approve" | "cancel" | null>(
+    null,
+  );
+
+  const onSuccess = () => {
+    queryClient.invalidateQueries({ queryKey: ["/purchase-orders"] });
+    queryClient.invalidateQueries({
+      queryKey: getGetPurchaseOrderQueryKey(purchaseOrder.id),
+    });
+    setConfirming(null);
+  };
+
+  const approve = () =>
+    approvePurchaseOrder(
+      { id: purchaseOrder.id, data: { status: Status.Approved } },
+      { onSuccess },
+    );
+
+  const cancel = () =>
+    cancelPurchaseOrder(
+      { id: purchaseOrder.id, data: { status: Status.Cancelled } },
+      { onSuccess },
+    );
+
   return (
     <>
       <HeaderActions>
@@ -18,10 +54,14 @@ export function HeaderActionsGroup({ purchaseOrder }: HeaderActionsGroupProps) {
           <Button>Finalize Order</Button>
         )}
         {isIn([Status.Finalized], purchaseOrder.status) && (
-          <Button>Approve Order</Button>
+          <Button onClick={() => setConfirming("approve")}>
+            Approve Order
+          </Button>
         )}
         {isIn([Status.Draft, Status.Finalized], purchaseOrder.status) && (
-          <Button variant="outline">Cancel Order</Button>
+          <Button variant="outline" onClick={() => setConfirming("cancel")}>
+            Cancel Order
+          </Button>
         )}
         {isIn([Status.Approved], purchaseOrder.status) && (
           <Button variant="outline">Create Delivery Receipt</Button>
@@ -44,6 +84,28 @@ export function HeaderActionsGroup({ purchaseOrder }: HeaderActionsGroupProps) {
           </Link>
         </Button>
       </HeaderActions>
+
+      <ConfirmDialog
+        open={confirming === "approve"}
+        onOpenChange={(open) => !open && setConfirming(null)}
+        title="Approve Order"
+        description={`Approve purchase order #${purchaseOrder.id}? It can no longer be edited after approval.`}
+        confirmLabel="Approve Order"
+        pendingLabel="Approving..."
+        isPending={isApproving}
+        onConfirm={approve}
+      />
+      <ConfirmDialog
+        open={confirming === "cancel"}
+        onOpenChange={(open) => !open && setConfirming(null)}
+        title="Cancel Order"
+        description={`Cancel purchase order #${purchaseOrder.id}? This cannot be undone.`}
+        confirmLabel="Cancel Order"
+        pendingLabel="Cancelling..."
+        confirmVariant="destructive"
+        isPending={isCancelling}
+        onConfirm={cancel}
+      />
     </>
   );
 }

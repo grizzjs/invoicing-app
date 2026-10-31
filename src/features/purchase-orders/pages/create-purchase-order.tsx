@@ -28,7 +28,7 @@ const schema = z.object({
   address: z.string().min(1, "Address is required"),
   phoneNumber: z.string().min(1, "Phone number is required"),
   email: z.string().email("Invalid email address"),
-  tin: z.string().regex(/^\d{3}-\d{3}-\d{3}-\d{4}$/, {
+  tin: z.string().regex(/^\d{3}-\d{3}-\d{3}-\d{5}$/, {
     message: "TIN must follow the format: XXX-XXX-XXX-XXXXX",
   }),
   lineItems: z
