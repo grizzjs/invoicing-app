@@ -1,11 +1,14 @@
 import { useGetCustomer } from "@/api/endpoints/customers/customers";
+import { InvoiceDtoStatus } from "@/api/models/invoiceDtoStatus";
 import { DataTable } from "@/components/ui/data-table/data-table";
 import { useParams } from "@tanstack/react-router";
 
 import { formatDate } from "@/lib/format-date";
+import { parseDateFromISO } from "@/lib/parse-date";
 import { CustomerCard } from "../components/customer-card.component";
 import { StatementOfAccountCard } from "../components/statement-of-account-card.component";
 import { columns } from "../definition/invoice";
+import { buildStatementOfAccount } from "../lib/statement-of-account";
 
 export default function ViewCustomerPage() {
   const params = useParams({ from: "/customers/$customerId" });
@@ -14,24 +17,27 @@ export default function ViewCustomerPage() {
     isLoading,
     isError,
   } = useGetCustomer(params.customerId);
-
   if (isLoading) return <p>Loading...</p>;
   if (isError) return <p>Error...</p>;
 
-  const account = {
-    previousBalance: 99999009.0,
-    newCharges: 999999.0,
-    credits: 999999.0,
-    outstandingBalance: 999999.0,
-  };
+  const account = buildStatementOfAccount(customer.invoices);
 
-  const invoices = customer.invoices.map(({ amount, createDate, id }) => {
-    return {
-      createDate: formatDate(createDate),
-      amount,
-      id,
-    };
-  });
+  // Only unpaid invoices, newest first. Sort on the date value before it is
+  // formatted for display.
+  const invoices = customer.invoices
+    .filter((invoice) => invoice.status === InvoiceDtoStatus.Unpaid)
+    .sort(
+      (a, b) =>
+        parseDateFromISO(b.createDate).toMillis() -
+        parseDateFromISO(a.createDate).toMillis(),
+    )
+    .map(({ amount, createDate, id }) => {
+      return {
+        createDate: formatDate(createDate),
+        amount,
+        id,
+      };
+    });
 
   return (
     <main className="flex flex-1 flex-col overflow-auto">

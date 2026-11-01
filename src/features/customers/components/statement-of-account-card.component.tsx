@@ -31,12 +31,12 @@ export function StatementOfAccountCard({
           <Value className="justify-self-end">
             {format(account.previousBalance)}
           </Value>
+          <Key>Credits</Key>
+          <Value className="justify-self-end">{format(account.credits)}</Value>
           <Key>New Charges</Key>
           <Value className="justify-self-end">
             {format(account.newCharges)}
           </Value>
-          <Key>Credits</Key>
-          <Value className="justify-self-end">{format(account.credits)}</Value>
           <Key>Outstanding Balance</Key>
           <Value className="justify-self-end">
             {format(account.outstandingBalance)}
