@@ -12,7 +12,9 @@ import {
   getGetPurchaseOrderQueryKey,
   useGetPurchaseOrder,
 } from "@/api/endpoints/purchase-orders/purchase-orders";
+import { useGetFiles } from "@/api/endpoints/s3/s3";
 import { Header } from "@/components/ui/header";
+import { uploadFiles } from "@/features/common/lib/upload-files";
 import isIn from "@/lib/is-in";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
@@ -41,6 +43,11 @@ export default function EditDeliveryPage() {
     query: { enabled: !!purchaseOrderId },
   });
 
+  const { data: existingFiles = [] } = useGetFiles(
+    "deliveries",
+    params.deliveryId,
+  );
+
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -58,7 +65,7 @@ export default function EditDeliveryPage() {
   // Rows are matched to the delivery's line items by purchase order line
   // item: removed rows are deleted, existing rows updated and new rows
   // created.
-  const save = async ({ lineItems }: DeliveryFormValues) => {
+  const save = async ({ lineItems }: DeliveryFormValues, files: File[]) => {
     const keptIds = lineItems.map((lineItem) => lineItem.id);
     await Promise.all([
       ...delivery.lineItems
@@ -82,6 +89,9 @@ export default function EditDeliveryPage() {
             });
       }),
     ]);
+    if (files.length > 0) {
+      await uploadFiles("deliveries", delivery.id, files);
+    }
     await Promise.all([
       queryClient.invalidateQueries({
         queryKey: getGetDeliveryReceiptQueryKey(delivery.id),
@@ -111,6 +121,7 @@ export default function EditDeliveryPage() {
           createDate={delivery.createDate}
           lineItemOptions={lineItemOptions}
           cancelTo={viewPath}
+          existingFiles={existingFiles}
           defaultValues={{
             customer: customer.name,
             address: customer.address,

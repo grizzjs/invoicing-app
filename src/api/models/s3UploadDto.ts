@@ -6,4 +6,7 @@
  * OpenAPI spec version: 1.0
  */
 
-export interface Buffer { [key: string]: unknown }
+export interface S3UploadDto {
+  /** File to upload (max 20 MB) */
+  file: Blob;
+}

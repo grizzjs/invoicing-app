@@ -9,6 +9,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  SupportingDocumentsSection,
+  useSupportingDocuments,
+} from "@/features/common/components/supporting-documents";
 import { useAppForm } from "@/features/common/hooks/form";
 import formatPhoneNumber from "@/features/customers/lib/formatPhoneNumber";
 import { formatDate } from "@/lib/format-date";
@@ -64,7 +68,11 @@ type PurchaseOrderFormProps = {
   // Editing keeps the purchase order's customer.
   lockCustomer?: boolean;
   cancelTo: string;
-  onSubmit: (values: PurchaseOrderFormValues) => Promise<unknown> | void;
+  existingFiles?: string[];
+  onSubmit: (
+    values: PurchaseOrderFormValues,
+    files: File[],
+  ) => Promise<unknown> | void;
 };
 
 export default function PurchaseOrderForm({
@@ -73,11 +81,15 @@ export default function PurchaseOrderForm({
   defaultValues = blankValues,
   lockCustomer = false,
   cancelTo,
+  existingFiles = [],
   onSubmit,
 }: PurchaseOrderFormProps) {
+  const docs = useSupportingDocuments(existingFiles);
+
   const form = useAppForm({
     defaultValues,
-    onSubmit: ({ value }) => onSubmit(purchaseOrderSchema.parse(value)),
+    onSubmit: ({ value }) =>
+      onSubmit(purchaseOrderSchema.parse(value), docs.getFiles()),
     validators: {
       onMount: purchaseOrderSchema,
       onChange: purchaseOrderSchema,
@@ -361,6 +373,9 @@ export default function PurchaseOrderForm({
                 )}
               </form.Field>
             </section>
+          </FieldSet>
+          <FieldSet className="grid grid-cols-1 gap-4">
+            <SupportingDocumentsSection {...docs} />
           </FieldSet>
         </FieldGroup>
         <div className="flex justify-end gap-3 pt-2 px-6 mb-6 ">

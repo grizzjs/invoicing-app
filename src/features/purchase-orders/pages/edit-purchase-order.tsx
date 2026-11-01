@@ -7,7 +7,9 @@ import {
   updatePurchaseOrder,
   useGetPurchaseOrder,
 } from "@/api/endpoints/purchase-orders/purchase-orders";
+import { useGetFiles } from "@/api/endpoints/s3/s3";
 import { Header } from "@/components/ui/header";
+import { uploadFiles } from "@/features/common/lib/upload-files";
 import isIn from "@/lib/is-in";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
@@ -25,6 +27,11 @@ export default function EditPurchaseOrderPage() {
     isError,
   } = useGetPurchaseOrder(params.purchaseOrderId);
 
+  const { data: existingFiles = [] } = useGetFiles(
+    "purchase-orders",
+    params.purchaseOrderId,
+  );
+
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -37,7 +44,10 @@ export default function EditPurchaseOrderPage() {
   // Notes are saved on the purchase order itself. Line items are saved through
   // the line item endpoints: removed rows are deleted, existing rows updated
   // and new rows created.
-  const save = async ({ notes, lineItems }: PurchaseOrderFormValues) => {
+  const save = async (
+    { notes, lineItems }: PurchaseOrderFormValues,
+    files: File[],
+  ) => {
     const keptIds = lineItems.map((lineItem) => lineItem.id);
     await Promise.all([
       updatePurchaseOrder(purchaseOrder.id, {
@@ -55,6 +65,9 @@ export default function EditPurchaseOrderPage() {
           : createPurchaseOrderLineItem(purchaseOrder.id, lineItem),
       ),
     ]);
+    if (files.length > 0) {
+      await uploadFiles("purchase-orders", purchaseOrder.id, files);
+    }
     await queryClient.invalidateQueries({ queryKey: ["/purchase-orders"] });
     navigate({ to: viewPath });
   };
@@ -74,6 +87,7 @@ export default function EditPurchaseOrderPage() {
           createDate={purchaseOrder.createDate}
           lockCustomer={true}
           cancelTo={viewPath}
+          existingFiles={existingFiles}
           defaultValues={{
             customer: { id: customer.id },
             address: customer.address,
