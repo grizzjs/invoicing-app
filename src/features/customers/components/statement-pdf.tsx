@@ -153,7 +153,7 @@ const StatementPDF = ({ entity, account }: StatementPDF) => {
         </View>
         {/* Table Header */}
         <View style={tw("flex-row border-b border-gray-200 pb-2 mb-1")}>
-          <Text style={tw("w-[72px] font-bold")}>Due Date</Text>
+          <Text style={tw("w-[72px] font-bold")}>Date</Text>
           <Text style={tw("w-[72px] flex-1  font-bold text-center")}>
             Description
           </Text>
