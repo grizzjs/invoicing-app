@@ -193,8 +193,6 @@ function InvoiceForm({ onClose }: { onClose: () => void }) {
     .filter((po) => po.eligible.length > 0)
     .slice(0,10);
 
-  console.log(purchaseOrders.find((po) => po.id == 3));
-
   const purchaseOrdersToList = eligiblePurchaseOrders.filter((po) =>
     po.id.toString().includes(query),
   );
