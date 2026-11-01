@@ -8,6 +8,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  SupportingDocumentsSection,
+  useSupportingDocuments,
+} from "@/features/common/components/supporting-documents";
 import { useAppForm } from "@/features/common/hooks/form";
 import formatPhoneNumber from "@/features/customers/lib/formatPhoneNumber";
 import {
@@ -59,7 +63,11 @@ type DeliveryFormProps = {
   lineItemOptions: LineItemOption[];
   defaultValues: DeliveryFormValues;
   cancelTo: string;
-  onSubmit: (values: DeliveryFormValues) => Promise<unknown> | void;
+  existingFiles?: string[];
+  onSubmit: (
+    values: DeliveryFormValues,
+    files: File[],
+  ) => Promise<unknown> | void;
 };
 
 export default function DeliveryForm({
@@ -68,11 +76,15 @@ export default function DeliveryForm({
   lineItemOptions,
   defaultValues,
   cancelTo,
+  existingFiles = [],
   onSubmit,
 }: DeliveryFormProps) {
+  const docs = useSupportingDocuments(existingFiles);
+
   const form = useAppForm({
     defaultValues,
-    onSubmit: ({ value }) => onSubmit(deliverySchema.parse(value)),
+    onSubmit: ({ value }) =>
+      onSubmit(deliverySchema.parse(value), docs.getFiles()),
     validators: {
       onMount: deliverySchema,
       onChange: deliverySchema,
@@ -380,6 +392,9 @@ export default function DeliveryForm({
                 )}
               </form.Field>
             </section>
+          </FieldSet>
+          <FieldSet className="grid grid-cols-1 gap-4">
+            <SupportingDocumentsSection {...docs} />
           </FieldSet>
         </FieldGroup>
         <div className="flex justify-end gap-3 pt-2 px-6 mb-6 ">

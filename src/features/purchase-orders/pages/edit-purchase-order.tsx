@@ -3,9 +3,13 @@ import {
   deletePurchaseOrderLineItem,
   updatePurchaseOrderLineItem,
 } from "@/api/endpoints/line-items/line-items";
-import { useGetPurchaseOrder } from "@/api/endpoints/purchase-orders/purchase-orders";
-import { uploadFile, useGetFiles } from "@/api/endpoints/s3/s3";
+import {
+  updatePurchaseOrder,
+  useGetPurchaseOrder,
+} from "@/api/endpoints/purchase-orders/purchase-orders";
+import { useGetFiles } from "@/api/endpoints/s3/s3";
 import { Header } from "@/components/ui/header";
+import { uploadFiles } from "@/features/common/lib/upload-files";
 import isIn from "@/lib/is-in";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
@@ -14,12 +18,6 @@ import PurchaseOrderForm, {
 } from "../components/purchase-order-form";
 import Status from "../enum";
 import entityToBadge from "../lib/entity-to-badge";
-
-async function uploadFiles(purchaseOrderId: number, files: File[]) {
-  await Promise.all(
-    files.map((file) => uploadFile("purchase-orders", String(purchaseOrderId), { file })),
-  );
-}
 
 export default function EditPurchaseOrderPage() {
   const params = useParams({ from: "/purchase-orders/$purchaseOrderId/edit" });
@@ -43,11 +41,16 @@ export default function EditPurchaseOrderPage() {
   const viewPath = `/purchase-orders/${purchaseOrder.id}`;
   const { customer } = purchaseOrder;
 
-  // Line items are saved through the line item endpoints: removed rows are
-  // deleted, existing rows updated and new rows created.
-  const save = async ({ lineItems }: PurchaseOrderFormValues, files: File[]) => {
+  const save = async (
+    { notes, lineItems }: PurchaseOrderFormValues,
+    files: File[],
+  ) => {
     const keptIds = lineItems.map((lineItem) => lineItem.id);
     await Promise.all([
+      updatePurchaseOrder(purchaseOrder.id, {
+        status: purchaseOrder.status,
+        notes,
+      }),
       ...purchaseOrder.lineItems
         .filter((lineItem) => !keptIds.includes(lineItem.id))
         .map((lineItem) =>
@@ -60,7 +63,7 @@ export default function EditPurchaseOrderPage() {
       ),
     ]);
     if (files.length > 0) {
-      await uploadFiles(purchaseOrder.id, files);
+      await uploadFiles("purchase-orders", purchaseOrder.id, files);
     }
     await queryClient.invalidateQueries({ queryKey: ["/purchase-orders"] });
     navigate({ to: viewPath });
@@ -88,6 +91,7 @@ export default function EditPurchaseOrderPage() {
             phoneNumber: customer.phoneNumber,
             email: customer.email,
             tin: customer.tin,
+            notes: purchaseOrder.notes ?? "",
             lineItems: purchaseOrder.lineItems.map((lineItem) => ({
               id: lineItem.id,
               name: lineItem.name,

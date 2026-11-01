@@ -1,5 +1,6 @@
 import { useGetInvoice } from "@/api/endpoints/invoices/invoices";
-import type { DeliveryReceiptDto } from "@/api/models";
+import { useGetFiles } from "@/api/endpoints/s3/s3";
+import { InvoiceDtoStatus, type DeliveryReceiptDto } from "@/api/models";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table/data-table";
 import { DetailProperty, DetailsCard } from "@/components/ui/details-card";
@@ -7,6 +8,7 @@ import { Header } from "@/components/ui/header";
 import { Key } from "@/components/ui/key-pair/key";
 import { Value } from "@/components/ui/key-pair/value";
 import { ProgressSummary } from "@/components/ui/progress-summary";
+import AttachmentsDialog from "@/features/common/components/attachments-dialog";
 import { CustomerCard } from "@/features/customers/components/customer-card.component";
 import { formatDate } from "@/lib/format-date";
 import format from "@/lib/format-money";
@@ -14,6 +16,7 @@ import { parseDateFromISO } from "@/lib/parse-date";
 import { Link, useParams } from "@tanstack/react-router";
 import { Printer } from "lucide-react";
 import { map, pipe, uniq } from "ramda";
+import { useState } from "react";
 import { HeaderActionsGroup } from "../components/header-actions-group";
 import { columns } from "../definition/line-items";
 import entityToBadge from "../lib/entity-to-badge";
@@ -21,6 +24,9 @@ import entityToBadge from "../lib/entity-to-badge";
 export default function ViewInvoicesPage() {
   const params = useParams({ from: "/invoices/$invoiceId/" });
   const { data: invoice, isLoading, isError } = useGetInvoice(params.invoiceId);
+
+  const { data: files = [] } = useGetFiles("invoices", params.invoiceId);
+  const [attachmentsOpen, setAttachmentsOpen] = useState(false);
 
   if (isLoading) return <p>Loading...</p>;
   if (isError) return <p>Error...</p>;
@@ -95,7 +101,17 @@ export default function ViewInvoicesPage() {
               }),
             )}
           />
-          <DetailProperty header="Attachment" value="3 Files" />
+          <DetailProperty header="Attachment">
+            <button
+              type="button"
+              onClick={() => setAttachmentsOpen(true)}
+              className="text-sm text-gray-800 underline underline-offset-2 hover:text-gray-600 transition"
+            >
+              {files.length === 0
+                ? "No files"
+                : `${files.length} ${files.length === 1 ? "File" : "Files"}`}
+            </button>
+          </DetailProperty>
         </DetailsCard>
         <ProgressSummary title="Summary">
           <div>
@@ -136,6 +152,14 @@ export default function ViewInvoicesPage() {
           className="col-span-3"
         />
       </div>
+
+      <AttachmentsDialog
+        open={attachmentsOpen}
+        onOpenChange={setAttachmentsOpen}
+        resource="invoices"
+        resourceId={invoice.id}
+        files={files}
+      />
     </main>
   );
 }

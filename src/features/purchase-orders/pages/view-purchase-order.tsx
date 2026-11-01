@@ -12,7 +12,7 @@ import { formatDate } from "@/lib/format-date";
 import { useParams } from "@tanstack/react-router";
 import { complement, filter, isNil, map, pipe, reduce, sum, uniq } from "ramda";
 import { useState } from "react";
-import AttachmentsDialog from "../components/attachments-dialog";
+import AttachmentsDialog from "@/features/common/components/attachments-dialog";
 import { HeaderActionsGroup } from "../components/view-header-actions-group";
 import entityToBadge from "../lib/entity-to-badge";
 
@@ -162,7 +162,8 @@ export default function ViewPurchaseOrderPage() {
       <AttachmentsDialog
         open={attachmentsOpen}
         onOpenChange={setAttachmentsOpen}
-        purchaseOrderId={purchaseOrder.id}
+        resource="purchase-orders"
+        resourceId={purchaseOrder.id}
         files={files}
       />
     </main>
