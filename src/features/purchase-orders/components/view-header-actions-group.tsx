@@ -47,19 +47,28 @@ export function HeaderActionsGroup({ purchaseOrder }: HeaderActionsGroupProps) {
 
   const finalize = () =>
     finalizePurchaseOrder(
-      { id: purchaseOrder.id, data: { status: Status.Finalized } },
+      {
+        id: purchaseOrder.id,
+        data: { status: Status.Finalized, notes: purchaseOrder.notes },
+      },
       { onSuccess },
     );
 
   const approve = () =>
     approvePurchaseOrder(
-      { id: purchaseOrder.id, data: { status: Status.Approved } },
+      {
+        id: purchaseOrder.id,
+        data: { status: Status.Approved, notes: purchaseOrder.notes },
+      },
       { onSuccess },
     );
 
   const cancel = () =>
     cancelPurchaseOrder(
-      { id: purchaseOrder.id, data: { status: Status.Cancelled } },
+      {
+        id: purchaseOrder.id,
+        data: { status: Status.Cancelled, notes: purchaseOrder.notes },
+      },
       { onSuccess },
     );
 

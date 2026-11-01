@@ -30,6 +30,7 @@ export default function CreatePurchaseOrderPage() {
             data: {
               customer: { id: values.customer.id },
               status: "Finalized",
+              notes: values.notes,
               createDate: new Date().toISOString(),
               lineItems: values.lineItems,
             },

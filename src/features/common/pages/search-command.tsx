@@ -176,7 +176,7 @@ export function SearchCommand({ open, setOpen }: SearchCommand) {
         onOpenChange={setOpen}
         className="sm:max-w-2xl"
       >
-        <Command>
+        <Command shouldFilter={false}>
           <CommandInput
             value={rawSearch}
             onValueChange={setSearch}

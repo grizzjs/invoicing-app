@@ -26,6 +26,7 @@ const purchaseOrderSchema = z.object({
   address: z.string().min(1, "Address is required"),
   phoneNumber: z.string().min(1, "Phone number is required"),
   email: z.string().email("Invalid email address"),
+  notes: z.string(),
   tin: z.string().regex(/^\d{3}-\d{3}-\d{3}-\d{5}$/, {
     message: "TIN must follow the format: XXX-XXX-XXX-XXXXX",
   }),
@@ -55,6 +56,7 @@ const blankValues: PurchaseOrderFormValues = {
   address: "",
   phoneNumber: "",
   email: "",
+  notes: "",
   lineItems: [{ name: "", description: "", quantity: 1, unitPrice: 1 }],
   tin: "",
 };
@@ -211,6 +213,19 @@ export default function PurchaseOrderForm({
                 </form.AppField>
               </div>
             </div>
+          </FieldSet>
+          <FieldSet>
+            <h2 className="text-xs font-normal text-gray-400">Details</h2>
+            <form.AppField name="notes">
+              {(field) => (
+                <field.TextArea
+                  id="notes"
+                  label="Notes"
+                  orientation="horizontal"
+                  className="flex items-center gap-5"
+                />
+              )}
+            </form.AppField>
           </FieldSet>
           <FieldSet className="grid grid-cols-1 gap-6">
             <section>

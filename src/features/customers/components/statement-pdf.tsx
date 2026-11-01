@@ -6,11 +6,13 @@ import {
   Text,
   View,
 } from "@react-pdf/renderer";
+import { DateTime } from "luxon";
 import { createTw } from "react-pdf-tailwind";
 
 import type { CustomerDto } from "@/api/models";
 import logo from "@/assets/logo.png";
 import format from "@/lib/format-money";
+import type { buildStatementOfAccount } from "../lib/statement-of-account";
 
 Font.register({
   family: "NotoSans",
@@ -53,25 +55,13 @@ const invoiceData = {
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi eleifend lobortis varius. Praesent orci est, finibus varius imperdiet et, accumsan id elit. Etiam dolor sapien, elementum eu molestie ut, eleifend vel nisl.",
 };
 
-const lineItems = [
-  {
-    dueDate: "01/02/2026",
-    description: "Previous Balance (forwarded)",
-    charge: 99999999,
-  },
-  {
-    dueDate: "12/15/2025",
-    description: "Payment for Invoices (#1, #2, #3)",
-    credit: 30000,
-  },
-];
-
 type StatementPDF = {
   entity: CustomerDto;
+  account: ReturnType<typeof buildStatementOfAccount>;
 };
 
 // ── Component ───────────────────────────────────────────────────────────────
-const StatementPDF = ({ entity }: StatementPDF) => {
+const StatementPDF = ({ entity, account }: StatementPDF) => {
   return (
     <Document>
       <Page
@@ -133,31 +123,37 @@ const StatementPDF = ({ entity }: StatementPDF) => {
             <Text style={tw("font-bold")}>General Information</Text>
             <View style={tw("flex-row")}>
               <Text style={tw("flex-1")}>Statement Date</Text>
-              <Text style={tw("text-right")}>{`Jan 5, 2026`}</Text>
+              <Text style={tw("text-right")}>
+                {DateTime.now().toFormat("LLL d, yyyy")}
+              </Text>
             </View>
             <View style={tw("flex-row")}>
               <Text style={tw("flex-1")}>Previous Balance</Text>
-              <Text style={tw("text-right")}>{format(99999999)}</Text>
+              <Text style={tw("text-right")}>
+                {format(account.previousBalance)}
+              </Text>
             </View>
 
             <View style={tw("flex-row")}>
               <Text style={tw("flex-1")}>Credits</Text>
-              <Text style={tw("text-right")}>{format(99999999)}</Text>
+              <Text style={tw("text-right")}>{format(account.credits)}</Text>
             </View>
 
             <View style={tw("flex-row")}>
               <Text style={tw("flex-1")}>New Charges</Text>
-              <Text style={tw("text-right")}>{format(99999999)}</Text>
+              <Text style={tw("text-right")}>{format(account.newCharges)}</Text>
             </View>
             <View style={tw("flex-row")}>
               <Text style={tw("flex-1")}>Outstanding Balance</Text>
-              <Text style={tw("text-right")}>{format(99999999)}</Text>
+              <Text style={tw("text-right")}>
+                {format(account.outstandingBalance)}
+              </Text>
             </View>
           </View>
         </View>
         {/* Table Header */}
         <View style={tw("flex-row border-b border-gray-200 pb-2 mb-1")}>
-          <Text style={tw("w-[72px] font-bold")}>Due Date</Text>
+          <Text style={tw("w-[72px] font-bold")}>Date</Text>
           <Text style={tw("w-[72px] flex-1  font-bold text-center")}>
             Description
           </Text>
@@ -166,13 +162,13 @@ const StatementPDF = ({ entity }: StatementPDF) => {
         </View>
 
         {/* Table Rows */}
-        {lineItems.map((item, i) => (
+        {account.lineItems.map((item, i) => (
           <View key={i} style={tw("flex-row border-b border-gray-200 py-2")}>
             <View style={tw("w-[72px]")}>
               <Text
                 style={{ ...tw("text-gray-800"), fontFamily: "NotoSansMono" }}
               >
-                {item.dueDate}
+                {item.date.toFormat("MM/dd/yyyy")}
               </Text>
             </View>
             <Text
@@ -213,7 +209,7 @@ const StatementPDF = ({ entity }: StatementPDF) => {
               Outstanding Balance
             </Text>
             <Text style={{ ...tw("pl-3 font-bold"), width: 120 }}>
-              {format(99999999)}
+              {format(account.outstandingBalance)}
             </Text>
           </View>
         </View>

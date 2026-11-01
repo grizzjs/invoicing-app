@@ -25,3 +25,6 @@ dist-ssr
 
 # TanStack Router generated route tree
 src/routeTree.gen.ts
+
+# TanStack dev tools
+.tanstack

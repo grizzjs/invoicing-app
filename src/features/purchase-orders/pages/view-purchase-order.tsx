@@ -127,6 +127,7 @@ export default function ViewPurchaseOrderPage() {
                   : `${files.length} ${files.length === 1 ? "File" : "Files"}`}
               </button>
             </DetailProperty>
+            <DetailProperty header="Notes" value={purchaseOrder.notes || "-"} />
           </DetailsCard>
           <CustomerCard customer={purchaseOrder.customer} />
         </div>

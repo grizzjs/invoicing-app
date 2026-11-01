@@ -41,6 +41,9 @@ export default function EditPurchaseOrderPage() {
   const viewPath = `/purchase-orders/${purchaseOrder.id}`;
   const { customer } = purchaseOrder;
 
+  // Notes are saved on the purchase order itself. Line items are saved through
+  // the line item endpoints: removed rows are deleted, existing rows updated
+  // and new rows created.
   const save = async (
     { notes, lineItems }: PurchaseOrderFormValues,
     files: File[],
