@@ -56,7 +56,7 @@ export function HeaderActionsGroup({
         {nextStatus && (
           <Button onClick={() => setConfirming(true)}>Update Progress</Button>
         )}
-        {isIn([Status.New, Status.Shipped, Status.Delivered]) && (
+        {isIn([Status.Shipped, Status.Delivered], deliveryReceipt.status) && (
           <Button variant="outline">Create Sales Invoice</Button>
         )}
       </HeaderActions>
