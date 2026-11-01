@@ -1,5 +1,5 @@
 import { useGetInvoice } from "@/api/endpoints/invoices/invoices";
-import type { DeliveryReceiptDto } from "@/api/models";
+import { InvoiceDtoStatus, type DeliveryReceiptDto } from "@/api/models";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table/data-table";
 import { DetailProperty, DetailsCard } from "@/components/ui/details-card";
@@ -109,26 +109,32 @@ export default function ViewInvoicesPage() {
             <Value className="justify-self-end">
               {formatDate("2026-01-01T00:00:00Z")}
             </Value>
-            <Key>Collection Number</Key>
-            <Link to={`/collections/${invoice.collection?.id}`}>
-              <span className="underline">
-                <Value className="justify-self-end">
-                  {invoice.collection?.id}
-                </Value>
-              </span>
-            </Link>
+            {invoice.status !== InvoiceDtoStatus.Unpaid && (
+              <>
+                <Key>Collection Number</Key>
+                <Link to={`/collections/${invoice.collection?.id}`}>
+                  <span className="underline">
+                    <Value className="justify-self-end">
+                      {invoice.collection?.id}
+                    </Value>
+                  </span>
+                </Link>
+              </>
+            )}
           </div>
 
-          <Button
-            variant="secondary"
-            className="mt-5 w-full py-2.5 px-3 text-sm"
-            asChild
-          >
-            <Link to={`official-receipt`} target="_blank">
-              <Printer className="h-4 w-4" />
-              View Official Receipt
-            </Link>
-          </Button>
+          {invoice.status !== InvoiceDtoStatus.Unpaid && (
+            <Button
+              variant="secondary"
+              className="mt-5 w-full py-2.5 px-3 text-sm"
+              asChild
+            >
+              <Link to={`official-receipt`} target="_blank">
+                <Printer className="h-4 w-4" />
+                View Official Receipt
+              </Link>
+            </Button>
+          )}
         </ProgressSummary>
         <CustomerCard customer={invoice.customer} className="col-span-3" />
         <DataTable
