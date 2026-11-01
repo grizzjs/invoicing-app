@@ -169,8 +169,6 @@ export function SearchCommand({ open, setOpen }: SearchCommand) {
     );
   }
 
-  console.log(purchaseOrders);
-
   return (
     <div className="flex flex-col gap-4">
       <CommandDialog
