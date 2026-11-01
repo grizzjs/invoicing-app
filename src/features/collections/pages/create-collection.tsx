@@ -1,5 +1,8 @@
+import { useCreateCollection } from "@/api/endpoints/collections/collections";
 import { useGetCustomers } from "@/api/endpoints/customers/customers";
+import { useGetInvoices } from "@/api/endpoints/invoices/invoices";
 import type { CustomerDto } from "@/api/models";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
 import { Header } from "@/components/ui/header";
@@ -15,12 +18,17 @@ import { useAppForm } from "@/features/common/hooks/form";
 import formatPhoneNumber from "@/features/customers/lib/formatPhoneNumber";
 import { today } from "@/lib/date-utils";
 import { formatDate } from "@/lib/format-date";
+import format from "@/lib/format-money";
+import { parseDateFromISO } from "@/lib/parse-date";
 import { formOptions } from "@tanstack/react-form";
-import { Link } from "@tanstack/react-router";
-import { Trash2 } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { isAxiosError } from "axios";
+import { CircleAlert, Trash2 } from "lucide-react";
 import { useState } from "react";
 import z from "zod";
 import InvoiceDialog from "../components/invoice-dialog";
+import SelectCustomerDialog from "../components/select-customer-dialog";
 
 const schema = z.object({
   customer: z.object({ id: z.number() }, "Customer is required"),
@@ -37,7 +45,8 @@ const schema = z.object({
     .object({
       id: z.number().min(1, "Invoice id is required"),
     })
-    .array(),
+    .array()
+    .min(1, "Add at least one invoice"),
 });
 
 type CollectionFormValues = z.infer<typeof schema>;
@@ -60,39 +69,51 @@ const registerFormOpts = formOptions({
   defaultValues: blankValues,
 });
 
+const FALLBACK_ERROR = "Something went wrong while saving. Please try again.";
+
+// NestJS errors carry `message` as a string, or as a list of validation errors.
+function getErrorMessage(error: unknown) {
+  if (!isAxiosError(error)) return FALLBACK_ERROR;
+  const message = error.response?.data?.message;
+  if (Array.isArray(message)) return message.join(", ");
+  return typeof message === "string" && message ? message : FALLBACK_ERROR;
+}
+
 export default function CreateCollectionPage() {
-  const { data: customers, isLoading } = useGetCustomers();
+  const { data: customers, isLoading: isLoadingCustomers } = useGetCustomers();
+  const { data: invoices, isLoading: isLoadingInvoices } = useGetInvoices();
+  const isLoading = isLoadingCustomers || isLoadingInvoices;
 
   const [open, setOpen] = useState(false);
+  const [customerRequired, setCustomerRequired] = useState(false);
 
-  // const { mutate } = useCreatePurchaseOrder();
+  const { mutate, isPending, isError, error } = useCreateCollection();
 
-  // const queryClient = useQueryClient();
-  // const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const form = useAppForm({
     ...registerFormOpts,
     onSubmit: ({ value }) => {
       const processed = schema.parse(value);
-      console.log(processed);
-      // mutate(
-      //   {
-      //     data: {
-      //       customer: {
-      //         id: processed.customer.id,
-      //       },
-      //       status: "Finalized",
-      //       createDate: new Date().toISOString(),
-      //       lineItems: processed.lineItems,
-      //     },
-      //   },
-      //   {
-      //     onSuccess: (data) => {
-      //       queryClient.invalidateQueries({ queryKey: ["/purchase-orders"] });
-      //       navigate({ to: `/purchase-orders/${data.id}` });
-      //     },
-      //   },
-      // );
+      mutate(
+        {
+          data: {
+            createDate: new Date().toISOString(),
+            amount: processed.amount,
+            vat: processed.tax,
+            notes: processed.notes,
+            customer: processed.customer.id,
+            invoices: processed.invoices.map((invoice) => invoice.id),
+          },
+        },
+        {
+          onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: ["/collections"] });
+            navigate({ to: `/collections/${data.id}` });
+          },
+        },
+      );
     },
     validators: {
       onMount: schema,
@@ -105,7 +126,36 @@ export default function CreateCollectionPage() {
   return (
     <main className="flex flex-1 flex-col overflow-auto gap-4">
       <Header title="Collections" action="Create"></Header>
-      <InvoiceDialog open={open} onOpenChange={setOpen} />
+      <form.Subscribe
+        selector={(state) => [state.values.customer, state.values.invoices]}
+      >
+        {([customerValue, addedInvoices]) => {
+          const selectedCustomer = customers.find(
+            (customer) => customer.id === (customerValue as { id: number }).id,
+          );
+          return (
+            <>
+              <SelectCustomerDialog
+                open={customerRequired}
+                onOpenChange={setCustomerRequired}
+              />
+              {selectedCustomer && (
+                <InvoiceDialog
+                  open={open}
+                  onOpenChange={setOpen}
+                  customer={selectedCustomer}
+                  excludedIds={(addedInvoices as { id: number }[]).map(
+                    (invoice) => invoice.id,
+                  )}
+                  onAdd={(ids) =>
+                    ids.forEach((id) => form.pushFieldValue("invoices", { id }))
+                  }
+                />
+              )}
+            </>
+          );
+        }}
+      </form.Subscribe>
       <form.AppForm>
         <form
           onSubmit={(e) => {
@@ -144,6 +194,8 @@ export default function CreateCollectionPage() {
                           className="flex items-center gap-5"
                           customers={customers}
                           onChange={(value: CustomerDto) => {
+                            // Invoices belong to the previous customer.
+                            field.form.setFieldValue("invoices", []);
                             field.form.setFieldValue("address", value.address);
                             field.form.setFieldValue(
                               "phoneNumber",
@@ -297,46 +349,54 @@ export default function CreateCollectionPage() {
                         </TableHeader>
 
                         <TableBody>
-                          {field.state.value.map((_, idx) => (
-                            <TableRow
-                              key={idx}
-                              className={
-                                idx % 2 === 0 ? "bg-background" : "bg-muted/20"
-                              }
-                            >
-                              <TableCell>
-                                <form.AppField name={`invoices[${idx}].id`}>
-                                  {(field) => {
-                                    return (
-                                      <field.TextInput
-                                        id={`invoices[${idx}].id`}
-                                        label=""
-                                        orientation="horizontal"
-                                        className="flex items-center gap-5"
-                                        hideLabel={true}
-                                      />
-                                    );
-                                  }}
-                                </form.AppField>
-                              </TableCell>
-                              <TableCell>{}</TableCell>
-                              <TableCell></TableCell>
-                              <TableCell></TableCell>
-                              <TableCell></TableCell>
-                              <TableCell className="text-center">
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="icon"
-                                  disabled={field.state.value.length === 1}
-                                  onClick={() => field.removeValue(idx)}
-                                  className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          ))}
+                          {field.state.value.map((row, idx) => {
+                            const invoice = invoices.find(
+                              (i) => i.id === row.id,
+                            );
+                            const createDate = invoice
+                              ? parseDateFromISO(invoice.createDate)
+                              : undefined;
+                            return (
+                              <TableRow
+                                key={row.id}
+                                className={
+                                  idx % 2 === 0
+                                    ? "bg-background"
+                                    : "bg-muted/20"
+                                }
+                              >
+                                <TableCell>{row.id}</TableCell>
+                                <TableCell>
+                                  {createDate && formatDate(createDate)}
+                                </TableCell>
+                                <TableCell>
+                                  {invoice && `${invoice.dueInDays} days`}
+                                </TableCell>
+                                <TableCell>
+                                  {createDate &&
+                                    formatDate(
+                                      createDate.plus({
+                                        days: invoice.dueInDays,
+                                      }),
+                                    )}
+                                </TableCell>
+                                <TableCell>
+                                  {invoice && format(invoice.amount)}
+                                </TableCell>
+                                <TableCell className="text-center">
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => field.removeValue(idx)}
+                                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
                         </TableBody>
                       </Table>
 
@@ -344,7 +404,13 @@ export default function CreateCollectionPage() {
                         <button
                           type="button"
                           onClick={() => {
-                            setOpen(true);
+                            const hasCustomer = customers.some(
+                              (customer) =>
+                                customer.id ===
+                                form.getFieldValue("customer")?.id,
+                            );
+                            if (hasCustomer) setOpen(true);
+                            else setCustomerRequired(true);
                           }}
                           className="flex items-center gap-2 text-sm font-medium text-gray-800 hover:text-gray-900 transition"
                         >
@@ -370,6 +436,16 @@ export default function CreateCollectionPage() {
               </div>
             </FieldSet>
           </FieldGroup>
+          {isError && (
+            <div className="px-6 mb-4">
+              <Alert variant="destructive">
+                <CircleAlert />
+                <AlertTitle>Unable to save collection</AlertTitle>
+                <AlertDescription>{getErrorMessage(error)}</AlertDescription>
+              </Alert>
+            </div>
+          )}
+
           <div className="flex justify-end gap-3 pt-2 px-6 mb-6 ">
             <Button variant="outline" asChild>
               <Link to="/collections">Cancel</Link>
@@ -378,8 +454,8 @@ export default function CreateCollectionPage() {
               selector={(state) => [state.canSubmit, state.isSubmitting]}
             >
               {([canSubmit, isSubmitting]) => (
-                <Button type="submit" disabled={!canSubmit}>
-                  {isSubmitting ? "Saving..." : "Save"}
+                <Button type="submit" disabled={!canSubmit || isPending}>
+                  {isSubmitting || isPending ? "Saving..." : "Save"}
                 </Button>
               )}
             </form.Subscribe>
