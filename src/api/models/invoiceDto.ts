@@ -38,6 +38,6 @@ export interface InvoiceDto {
   deliveryReceipts?: DeliveryReceiptDto[];
   /** Collection associated with the invoice */
   collection: CollectionDto;
-  /** JobOrder associated with the invoice */
-  jobOrder?: JobOrderDto;
+  /** Job orders associated with the invoice */
+  jobOrders?: JobOrderDto[];
 }

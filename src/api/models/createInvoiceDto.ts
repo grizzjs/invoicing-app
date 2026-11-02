@@ -18,6 +18,6 @@ export interface CreateInvoiceDto {
   notes?: string | null;
   /** Delivery receipts associated with the invoice */
   deliveryReceipts?: number[];
-  /** Job order associated with the invoice */
-  jobOrder?: number;
+  /** Job orders associated with the invoice */
+  jobOrders?: number[];
 }

@@ -262,7 +262,7 @@ function InvoiceForm({
             dueInDays: Number(processed.terms),
             notes: processed.notes,
             ...(targetJobOrderId !== undefined
-              ? { jobOrder: targetJobOrderId }
+              ? { jobOrders: [targetJobOrderId] }
               : { deliveryReceipts: deliveryReceiptsPayload }),
           },
         },

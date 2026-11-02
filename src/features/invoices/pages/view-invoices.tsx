@@ -41,6 +41,8 @@ export default function ViewInvoicesPage() {
     Array.isArray(invoice.deliveryReceipts) &&
     invoice.deliveryReceipts.length > 0;
 
+  const jobOrders = invoice.jobOrders ?? [];
+
   const lineItems = hasDeliveryReceipts
     ? invoice.deliveryReceipts.flatMap((delivery) => {
         return delivery.lineItems.map((lineItem) => {
@@ -54,13 +56,15 @@ export default function ViewInvoicesPage() {
           };
         });
       })
-    : invoice.jobOrder?.lineItems?.map((lineItem) => ({
-        name: lineItem.name,
-        description: lineItem.description,
-        quantity: lineItem.quantity,
-        unitPrice: lineItem.unitPrice,
-        amount: lineItem.quantity * lineItem.unitPrice,
-      })) || [];
+    : jobOrders.flatMap((jobOrder) =>
+        (jobOrder.lineItems ?? []).map((lineItem) => ({
+          name: lineItem.name,
+          description: lineItem.description,
+          quantity: lineItem.quantity,
+          unitPrice: lineItem.unitPrice,
+          amount: lineItem.quantity * lineItem.unitPrice,
+        })),
+      );
 
   const purchaseOrders: number[] = hasDeliveryReceipts
     ? (pipe(
@@ -108,11 +112,14 @@ export default function ViewInvoicesPage() {
               </DetailProperty>
             </>
           ) : (
-            invoice.jobOrder && (
-              <DetailProperty header="Job Order Number">
-                <Link to={`/job-orders/${invoice.jobOrder.id}`}>
-                  <span className="underline">{invoice.jobOrder.id}</span>
-                </Link>
+            jobOrders.length > 0 && (
+              <DetailProperty header="Job Order Number/s">
+                {jobOrders.map((jobOrder, index) => (
+                  <Link key={jobOrder.id} to={`/job-orders/${jobOrder.id}`}>
+                    <span className="underline">{jobOrder.id}</span>
+                    {index + 1 == jobOrders.length ? "" : ", "}
+                  </Link>
+                ))}
               </DetailProperty>
             )
           )}

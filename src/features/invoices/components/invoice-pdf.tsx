@@ -72,14 +72,19 @@ const InvoicePDF = ({ entity }: InvoicePDF) => {
   const deliveries = entity.deliveryReceipts
     ? entity.deliveryReceipts.map((delivery) => delivery.id)
     : [];
+  const jobOrders = entity.jobOrders ?? [];
   const lineItems =
-    entity.jobOrder?.lineItems?.map((lineItem) => ({
-      name: lineItem.name,
-      description: lineItem.description,
-      quantity: lineItem.quantity,
-      unitPrice: lineItem.unitPrice,
-      amount: lineItem.quantity * lineItem.unitPrice,
-    })) ||
+    (jobOrders.length > 0
+      ? jobOrders.flatMap((jobOrder) =>
+          (jobOrder.lineItems ?? []).map((lineItem) => ({
+            name: lineItem.name,
+            description: lineItem.description,
+            quantity: lineItem.quantity,
+            unitPrice: lineItem.unitPrice,
+            amount: lineItem.quantity * lineItem.unitPrice,
+          })),
+        )
+      : undefined) ||
     entity.deliveryReceipts?.flatMap((delivery) => {
       return delivery.lineItems.map((lineItem) => {
         return {
@@ -141,7 +146,9 @@ const InvoicePDF = ({ entity }: InvoicePDF) => {
               justifyContent: "center",
             }}
           >
-            <Text style={tw("text-2xl font-bold")}>Sales Invoice</Text>
+            <Text style={tw("text-2xl font-bold")}>
+              {jobOrders.length > 0 ? "Service Invoice" : "Sales Invoice"}
+            </Text>
           </View>
         </View>
 
@@ -174,11 +181,17 @@ const InvoicePDF = ({ entity }: InvoicePDF) => {
               <Text style={tw("flex-1")}>Invoice No.</Text>
               <Text style={tw("text-right")}>{entity.id}</Text>
             </View>
-            {entity.jobOrder ? (
-              <View style={tw("flex-row")}>
-                <Text style={tw("flex-1")}>Job Order No.</Text>
-                <Text style={tw("text-right")}>{entity.jobOrder.id}</Text>
-              </View>
+            {jobOrders.length > 0 ? (
+              <>
+                {jobOrders.map((jobOrder, index) => (
+                  <View key={`jo-${index}`} style={tw("flex-row")}>
+                    <Text style={tw("flex-1")}>
+                      {index === 0 ? "Job Order No." : ""}
+                    </Text>
+                    <Text style={tw("text-right")}>{jobOrder.id}</Text>
+                  </View>
+                ))}
+              </>
             ) : (
               <>
                 {poNumbers.map((id, index) => (

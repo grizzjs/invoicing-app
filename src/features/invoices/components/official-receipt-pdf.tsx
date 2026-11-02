@@ -60,14 +60,19 @@ type InvoicePDF = {
 
 // ── Component ───────────────────────────────────────────────────────────────
 const OfficialReceiptPDF = ({ entity }: InvoicePDF) => {
+  const jobOrders = entity.jobOrders ?? [];
   const lineItems =
-    entity.jobOrder?.lineItems?.map((lineItem) => ({
-      name: lineItem.name,
-      description: lineItem.description,
-      quantity: lineItem.quantity,
-      unitPrice: lineItem.unitPrice,
-      amount: lineItem.quantity * lineItem.unitPrice,
-    })) ||
+    (jobOrders.length > 0
+      ? jobOrders.flatMap((jobOrder) =>
+          (jobOrder.lineItems ?? []).map((lineItem) => ({
+            name: lineItem.name,
+            description: lineItem.description,
+            quantity: lineItem.quantity,
+            unitPrice: lineItem.unitPrice,
+            amount: lineItem.quantity * lineItem.unitPrice,
+          })),
+        )
+      : undefined) ||
     entity.deliveryReceipts?.flatMap((delivery) => {
       return delivery.lineItems.map((lineItem) => {
         return {
