@@ -1,11 +1,14 @@
 import { useGetDeliveryReceipt } from "@/api/endpoints/delivery-receipts/delivery-receipts";
+import { useGetFiles } from "@/api/endpoints/s3/s3";
 import { DataTable } from "@/components/ui/data-table/data-table";
 import { DetailProperty, DetailsCard } from "@/components/ui/details-card";
 import { Header } from "@/components/ui/header";
 import { ProgressSummary } from "@/components/ui/progress-summary";
+import AttachmentsDialog from "@/features/common/components/attachments-dialog";
 import { CustomerCard } from "@/features/customers/components/customer-card.component";
 import { formatDate } from "@/lib/format-date";
-import { useParams } from "@tanstack/react-router";
+import { Link, useParams } from "@tanstack/react-router";
+import { useState } from "react";
 import { HeaderActionsGroup } from "../components/header-actions-group";
 import StatesTimeline from "../components/states-timeline";
 import { columns } from "../definition/line-items";
@@ -18,6 +21,9 @@ export default function ViewDeliveryPage() {
     isLoading,
     isError,
   } = useGetDeliveryReceipt(params.deliveryId);
+
+  const { data: files = [] } = useGetFiles("deliveries", params.deliveryId);
+  const [attachmentsOpen, setAttachmentsOpen] = useState(false);
 
   if (isLoading) return <p>Loading...</p>;
   if (isError) return <p>Error...</p>;
@@ -51,7 +57,23 @@ export default function ViewDeliveryPage() {
               header="Date Created"
               value={formatDate(delivery.createDate)}
             />
-            <DetailProperty header="Attachment" value="3 Files" />
+            <DetailProperty header="Purchase Order Number">
+              <Link to={`/purchase-orders/${delivery.purchaseOrder.id}`}>
+                <span className="underline">{delivery.purchaseOrder.id}</span>
+              </Link>
+            </DetailProperty>
+            <DetailProperty header="Notes" value={delivery.notes || "-"} />
+            <DetailProperty header="Attachment">
+              <button
+                type="button"
+                onClick={() => setAttachmentsOpen(true)}
+                className="text-sm text-gray-800 underline underline-offset-2 hover:text-gray-600 transition"
+              >
+                {files.length === 0
+                  ? "No files"
+                  : `${files.length} ${files.length === 1 ? "File" : "Files"}`}
+              </button>
+            </DetailProperty>
           </DetailsCard>
           <CustomerCard customer={delivery.purchaseOrder.customer} />
         </div>
@@ -60,9 +82,22 @@ export default function ViewDeliveryPage() {
           <StatesTimeline delivery={delivery} />
         </ProgressSummary>
         <div className="col-span-3">
-          <DataTable data={lineItems} columns={columns} enableSearch={true} />
+          <DataTable
+            data={lineItems}
+            columns={columns}
+            enableSearch={true}
+            defaultSorting={[{ id: "name", desc: false }]}
+          />
         </div>
       </div>
+
+      <AttachmentsDialog
+        open={attachmentsOpen}
+        onOpenChange={setAttachmentsOpen}
+        resource="deliveries"
+        resourceId={delivery.id}
+        files={files}
+      />
     </main>
   );
 }

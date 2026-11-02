@@ -24,7 +24,12 @@ export default function ListCustomersPage() {
       </div>
 
       <div className="pt-6 pr-6 pb-10 pl-6 gap-10">
-        <DataTable columns={columns} data={customers} enableSearch={true} />
+        <DataTable
+          columns={columns}
+          data={customers}
+          enableSearch={true}
+          defaultSorting={[{ id: "name", desc: false }]}
+        />
       </div>
     </main>
   );

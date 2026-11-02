@@ -74,6 +74,7 @@ export default function ListPurchaseOrdersPage() {
           data={formattedPurchaseOrders}
           enableSearch={true}
           initialState={initialState}
+          defaultSorting={[{ id: "id", desc: true }]}
         />
       </div>
     </main>

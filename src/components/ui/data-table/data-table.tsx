@@ -3,8 +3,10 @@ import {
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
+  getSortedRowModel,
   useReactTable,
   type ColumnDef,
+  type SortingState,
 } from "@tanstack/react-table";
 
 import {
@@ -36,6 +38,7 @@ interface DataTableProps<TData, TValue> {
   enableSearch?: boolean;
   enablePagination?: boolean;
   initialState?: { id: string; value: string | number | string[] };
+  defaultSorting?: SortingState;
   className?: string;
 }
 
@@ -43,6 +46,7 @@ export function DataTable<TData, TValue>({
   columns,
   data,
   initialState,
+  defaultSorting,
   className,
   enableSearch = false,
   enablePagination = true,
@@ -59,6 +63,7 @@ export function DataTable<TData, TValue>({
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
     onPaginationChange: setPagination,
     state: {
       globalFilter,
@@ -66,6 +71,7 @@ export function DataTable<TData, TValue>({
     },
     initialState: {
       columnFilters: [initialState].filter((f) => f),
+      sorting: defaultSorting ?? [],
     },
     onGlobalFilterChange: setGlobalFilter,
     globalFilterFn: "includesString",

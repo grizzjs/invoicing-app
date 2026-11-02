@@ -71,6 +71,7 @@ export default function ListDeliveriesPage() {
           data={formattedPDeliveryReceipts}
           enableSearch={true}
           initialState={initialState}
+          defaultSorting={[{ id: "id", desc: true }]}
         />
       </div>
     </main>

@@ -79,12 +79,14 @@ export function LineItemSheet({ lineItem }: LineItemSheetProp) {
             columns={deliveryColumns}
             data={deliveries}
             enablePagination={false}
+            defaultSorting={[{ id: "id", desc: true }]}
           />
           <Key>Invoice Progress</Key>
           <DataTable
             columns={invoiceColumns}
             data={invoices}
             enablePagination={false}
+            defaultSorting={[{ id: "id", desc: true }]}
           />
         </div>
       </SheetContent>

@@ -71,6 +71,7 @@ export default function ListInvoicesPage() {
           data={formattedInvoices}
           enableSearch={true}
           initialState={initialState}
+          defaultSorting={[{ id: "id", desc: true }]}
         />
       </div>
     </main>

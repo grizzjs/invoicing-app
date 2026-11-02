@@ -2,6 +2,7 @@ import { useGetCustomer } from "@/api/endpoints/customers/customers";
 import { useCreateDeliveryReceipt } from "@/api/endpoints/delivery-receipts/delivery-receipts";
 import { useGetPurchaseOrder } from "@/api/endpoints/purchase-orders/purchase-orders";
 import { Header } from "@/components/ui/header";
+import { uploadFiles } from "@/features/common/lib/upload-files";
 import { today } from "@/lib/date-utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
@@ -51,38 +52,40 @@ export default function CreateDeliveryPage() {
         createDate={today()}
         lineItemOptions={lineItemOptions}
         cancelTo="/deliveries"
+        showNotes
         defaultValues={{
           customer: customer.name,
           address: customer.address,
           phoneNumber: customer.phoneNumber,
           email: customer.email,
           tin: customer.tin,
+          notes: "",
           lineItems: lineItemOptions.filter((li) => ids.includes(li.id)),
         }}
-        onSubmit={(values) =>
+        onSubmit={async (values, files) => {
           mutate(
             {
               data: {
-                purchaseOrder: {
-                  id: purchaseOrderId,
-                },
+                purchaseOrder: { id: purchaseOrderId },
                 createDate: new Date().toISOString(),
+                notes: values.notes,
                 lineItems: values.lineItems.map((li) => ({
                   quantity: li.deliveryQuantity,
-                  purchaseOrderLineItem: {
-                    id: li.id,
-                  },
+                  purchaseOrderLineItem: { id: li.id },
                 })),
               },
             },
             {
-              onSuccess: (data) => {
+              onSuccess: async (data) => {
+                if (files.length > 0) {
+                  await uploadFiles("deliveries", data.id, files);
+                }
                 queryClient.invalidateQueries({ queryKey: ["/deliveries"] });
                 navigate({ to: `/deliveries/${data.id}` });
               },
             },
-          )
-        }
+          );
+        }}
       />
     </main>
   );

@@ -1,4 +1,5 @@
 import { useGetInvoice } from "@/api/endpoints/invoices/invoices";
+import { useGetFiles } from "@/api/endpoints/s3/s3";
 import { InvoiceDtoStatus, type DeliveryReceiptDto } from "@/api/models";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table/data-table";
@@ -7,6 +8,7 @@ import { Header } from "@/components/ui/header";
 import { Key } from "@/components/ui/key-pair/key";
 import { Value } from "@/components/ui/key-pair/value";
 import { ProgressSummary } from "@/components/ui/progress-summary";
+import AttachmentsDialog from "@/features/common/components/attachments-dialog";
 import { CustomerCard } from "@/features/customers/components/customer-card.component";
 import { formatDate } from "@/lib/format-date";
 import format from "@/lib/format-money";
@@ -14,6 +16,7 @@ import { parseDateFromISO } from "@/lib/parse-date";
 import { Link, useParams } from "@tanstack/react-router";
 import { Printer } from "lucide-react";
 import { map, pipe, uniq } from "ramda";
+import { useState } from "react";
 import { HeaderActionsGroup } from "../components/header-actions-group";
 import { columns } from "../definition/line-items";
 import entityToBadge from "../lib/entity-to-badge";
@@ -21,6 +24,9 @@ import entityToBadge from "../lib/entity-to-badge";
 export default function ViewInvoicesPage() {
   const params = useParams({ from: "/invoices/$invoiceId/" });
   const { data: invoice, isLoading, isError } = useGetInvoice(params.invoiceId);
+
+  const { data: files = [] } = useGetFiles("invoices", params.invoiceId);
+  const [attachmentsOpen, setAttachmentsOpen] = useState(false);
 
   if (isLoading) return <p>Loading...</p>;
   if (isError) return <p>Error...</p>;
@@ -95,7 +101,18 @@ export default function ViewInvoicesPage() {
               }),
             )}
           />
-          <DetailProperty header="Attachment" value="3 Files" />
+          <DetailProperty header="Attachment">
+            <button
+              type="button"
+              onClick={() => setAttachmentsOpen(true)}
+              className="text-sm text-gray-800 underline underline-offset-2 hover:text-gray-600 transition"
+            >
+              {files.length === 0
+                ? "No files"
+                : `${files.length} ${files.length === 1 ? "File" : "Files"}`}
+            </button>
+          </DetailProperty>
+          <DetailProperty header="Notes" value={invoice.notes || "-"} />
         </DetailsCard>
         <ProgressSummary title="Summary">
           <div>
@@ -105,12 +122,14 @@ export default function ViewInvoicesPage() {
             <p className="text-sm text-muted-foreground mb-5">Amount</p>
           </div>
           <div className="grid grid-cols-2 grid-rows-2 gap-2">
-            <Key>Date Paid</Key>
-            <Value className="justify-self-end">
-              {formatDate("2026-01-01T00:00:00Z")}
-            </Value>
             {invoice.status !== InvoiceDtoStatus.Unpaid && (
               <>
+                <Key>Date Paid</Key>
+                <Value className="justify-self-end">
+                  {invoice.collection
+                    ? formatDate(invoice.collection.createDate)
+                    : "-"}
+                </Value>
                 <Key>Collection Number</Key>
                 <Link to={`/collections/${invoice.collection?.id}`}>
                   <span className="underline">
@@ -142,8 +161,17 @@ export default function ViewInvoicesPage() {
           columns={columns}
           enableSearch={true}
           className="col-span-3"
+          defaultSorting={[{ id: "name", desc: false }]}
         />
       </div>
+
+      <AttachmentsDialog
+        open={attachmentsOpen}
+        onOpenChange={setAttachmentsOpen}
+        resource="invoices"
+        resourceId={invoice.id}
+        files={files}
+      />
     </main>
   );
 }

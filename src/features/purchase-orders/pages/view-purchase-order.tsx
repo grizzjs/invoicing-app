@@ -1,3 +1,4 @@
+import { useGetFiles } from "@/api/endpoints/s3/s3";
 import { useGetPurchaseOrder } from "@/api/endpoints/purchase-orders/purchase-orders";
 import { type DeliveryReceiptLineItemDto } from "@/api/models";
 import { DataTable } from "@/components/ui/data-table/data-table";
@@ -10,6 +11,8 @@ import { columns } from "@/features/purchase-orders/definition/line-items";
 import { formatDate } from "@/lib/format-date";
 import { useParams } from "@tanstack/react-router";
 import { complement, filter, isNil, map, pipe, reduce, sum, uniq } from "ramda";
+import { useState } from "react";
+import AttachmentsDialog from "../components/attachments-dialog";
 import { HeaderActionsGroup } from "../components/view-header-actions-group";
 import entityToBadge from "../lib/entity-to-badge";
 
@@ -37,6 +40,13 @@ export default function ViewPurchaseOrderPage() {
     isLoading,
     isError,
   } = useGetPurchaseOrder(params.purchaseOrderId);
+
+  const { data: files = [] } = useGetFiles(
+    "purchase-orders",
+    params.purchaseOrderId,
+  );
+
+  const [attachmentsOpen, setAttachmentsOpen] = useState(false);
 
   if (isLoading) return <p>Loading...</p>;
   if (isError) return <p>Error...</p>;
@@ -106,7 +116,17 @@ export default function ViewPurchaseOrderPage() {
               header="Date Created"
               value={formatDate(purchaseOrder.createDate)}
             />
-            <DetailProperty header="Attachment" value="3 Files" />
+            <DetailProperty header="Attachment">
+              <button
+                type="button"
+                onClick={() => setAttachmentsOpen(true)}
+                className="text-sm text-gray-800 underline underline-offset-2 hover:text-gray-600 transition"
+              >
+                {files.length === 0
+                  ? "No files"
+                  : `${files.length} ${files.length === 1 ? "File" : "Files"}`}
+              </button>
+            </DetailProperty>
             <DetailProperty header="Notes" value={purchaseOrder.notes || "-"} />
           </DetailsCard>
           <CustomerCard customer={purchaseOrder.customer} />
@@ -136,9 +156,21 @@ export default function ViewPurchaseOrderPage() {
           />
         </ProgressSummary>
         <div className="col-span-3">
-          <DataTable data={lineItems} columns={columns} enableSearch={true} />
+          <DataTable
+            data={lineItems}
+            columns={columns}
+            enableSearch={true}
+            defaultSorting={[{ id: "name", desc: false }]}
+          />
         </div>
       </div>
+
+      <AttachmentsDialog
+        open={attachmentsOpen}
+        onOpenChange={setAttachmentsOpen}
+        purchaseOrderId={purchaseOrder.id}
+        files={files}
+      />
     </main>
   );
 }

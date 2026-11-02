@@ -8,6 +8,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  SupportingDocumentsSection,
+  useSupportingDocuments,
+} from "@/features/common/components/supporting-documents";
 import { useAppForm } from "@/features/common/hooks/form";
 import formatPhoneNumber from "@/features/customers/lib/formatPhoneNumber";
 import {
@@ -28,6 +32,7 @@ const deliverySchema = z.object({
   tin: z.string().regex(/^\d{3}-\d{3}-\d{3}-\d{5}$/, {
     message: "TIN must follow the format: XXX-XXX-XXX-XXXXX",
   }),
+  notes: z.string(),
   lineItems: z
     .object({
       // Purchase order line item being delivered.
@@ -59,7 +64,13 @@ type DeliveryFormProps = {
   lineItemOptions: LineItemOption[];
   defaultValues: DeliveryFormValues;
   cancelTo: string;
-  onSubmit: (values: DeliveryFormValues) => Promise<unknown> | void;
+  // The API can only save notes when a delivery is created.
+  showNotes?: boolean;
+  existingFiles?: string[];
+  onSubmit: (
+    values: DeliveryFormValues,
+    files: File[],
+  ) => Promise<unknown> | void;
 };
 
 export default function DeliveryForm({
@@ -68,11 +79,16 @@ export default function DeliveryForm({
   lineItemOptions,
   defaultValues,
   cancelTo,
+  showNotes = false,
+  existingFiles = [],
   onSubmit,
 }: DeliveryFormProps) {
+  const docs = useSupportingDocuments(existingFiles);
+
   const form = useAppForm({
     defaultValues,
-    onSubmit: ({ value }) => onSubmit(deliverySchema.parse(value)),
+    onSubmit: ({ value }) =>
+      onSubmit(deliverySchema.parse(value), docs.getFiles()),
     validators: {
       onMount: deliverySchema,
       onChange: deliverySchema,
@@ -204,6 +220,21 @@ export default function DeliveryForm({
               </div>
             </div>
           </FieldSet>
+          {showNotes && (
+            <FieldSet>
+              <h2 className="text-xs font-normal text-gray-400">Details</h2>
+              <form.AppField name="notes">
+                {(field) => (
+                  <field.TextArea
+                    id="notes"
+                    label="Notes"
+                    orientation="horizontal"
+                    className="flex items-center gap-5"
+                  />
+                )}
+              </form.AppField>
+            </FieldSet>
+          )}
           <FieldSet className="grid grid-cols-1 gap-6">
             <section>
               <h2 className="text-xs font-normal text-gray-400 mb-5">
@@ -380,6 +411,9 @@ export default function DeliveryForm({
                 )}
               </form.Field>
             </section>
+          </FieldSet>
+          <FieldSet className="grid grid-cols-1 gap-4">
+            <SupportingDocumentsSection {...docs} />
           </FieldSet>
         </FieldGroup>
         <div className="flex justify-end gap-3 pt-2 px-6 mb-6 ">

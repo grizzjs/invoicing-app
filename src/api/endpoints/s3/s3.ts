@@ -25,7 +25,8 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  Buffer
+  Buffer,
+  S3UploadDto
 } from '../../models';
 
 import { customInstance } from '../../mutator/custom-instance';
@@ -129,12 +130,16 @@ export function useGetFiles<TData = Awaited<ReturnType<typeof getFiles>>, TError
 export const uploadFile = (
     resource: string,
     id: string,
+    s3UploadDto: S3UploadDto,
  signal?: AbortSignal
 ) => {
 
+      const formData = new FormData();
+formData.append(`file`, s3UploadDto.file);
 
       return customInstance<void>(
-      {url: `/s3/${resource}/${id}`, method: 'POST', signal
+      {url: `/s3/${resource}/${id}`, method: 'POST',
+       data: formData, signal
     },
       );
     }
@@ -142,8 +147,8 @@ export const uploadFile = (
 
 
 export const getUploadFileMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadFile>>, TError,{resource: string;id: string}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof uploadFile>>, TError,{resource: string;id: string}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadFile>>, TError,{resource: string;id: string;data: S3UploadDto}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof uploadFile>>, TError,{resource: string;id: string;data: S3UploadDto}, TContext> => {
 
 const mutationKey = ['uploadFile'];
 const {mutation: mutationOptions} = options ?
@@ -155,10 +160,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof uploadFile>>, {resource: string;id: string}> = (props) => {
-          const {resource,id} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof uploadFile>>, {resource: string;id: string;data: S3UploadDto}> = (props) => {
+          const {resource,id,data} = props ?? {};
 
-          return  uploadFile(resource,id,)
+          return  uploadFile(resource,id,data,)
         }
 
 
@@ -169,15 +174,15 @@ const {mutation: mutationOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type UploadFileMutationResult = NonNullable<Awaited<ReturnType<typeof uploadFile>>>
-
+    export type UploadFileMutationBody = S3UploadDto
     export type UploadFileMutationError = unknown
 
     export const useUploadFile = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadFile>>, TError,{resource: string;id: string}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadFile>>, TError,{resource: string;id: string;data: S3UploadDto}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof uploadFile>>,
         TError,
-        {resource: string;id: string},
+        {resource: string;id: string;data: S3UploadDto},
         TContext
       > => {
       return useMutation(getUploadFileMutationOptions(options), queryClient);
@@ -190,8 +195,8 @@ const {mutation: mutationOptions} = options ?
 ) => {
 
 
-      return customInstance<Buffer>(
-      {url: `/s3/${resource}/${id}/${key}`, method: 'GET', signal
+      return customInstance<ArrayBuffer>(
+      {url: `/s3/${resource}/${id}/${key}`, method: 'GET', responseType: 'arraybuffer', signal
     },
       );
     }
