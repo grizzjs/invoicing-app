@@ -5,6 +5,7 @@ import {
 } from "@/components/ui/input-group";
 import { Kbd } from "@/components/ui/kbd";
 import { logout } from "@/lib/auth";
+import { company } from "@/lib/company";
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
   Archive,
@@ -82,7 +83,7 @@ export function Sidebar() {
       <SearchCommand open={open} setOpen={setOpen} />
       {/* Logo */}
       <div className="h-14 flex items-center gap-6 p-6">
-        <span className="font-bold text-xl">Engine Labs</span>
+        <span className="font-bold text-xl">{company.name}</span>
       </div>
       {/* Search */}
       <div className="p-6">

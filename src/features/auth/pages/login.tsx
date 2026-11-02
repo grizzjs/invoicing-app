@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { login } from "@/lib/auth";
+import { company } from "@/lib/company";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 
@@ -43,7 +44,7 @@ export default function LoginPage() {
     <div className="flex h-screen w-screen items-center justify-center bg-muted/30">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle className="text-xl">Engine Labs</CardTitle>
+          <CardTitle className="text-xl">{company.name}</CardTitle>
           <CardDescription>Sign in to your account</CardDescription>
         </CardHeader>
         <CardContent>

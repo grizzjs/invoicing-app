@@ -9,7 +9,7 @@ import {
 import { createTw } from "react-pdf-tailwind";
 
 import type { InvoiceDto } from "@/api/models";
-import logo from "@/assets/logo.png";
+import { company } from "@/lib/company";
 import { formatDate } from "@/lib/format-date";
 import format from "@/lib/format-money";
 import { parseDateFromISO } from "@/lib/parse-date";
@@ -46,12 +46,6 @@ const tw = createTw({
 
 // ── Data ────────────────────────────────────────────────────────────────────
 const invoiceData = {
-  company: {
-    name: "ENGINE✕LABS",
-    tagline: "IT SOLUTIONS",
-    address: "359 Mc Arthur Hi-Way, Brgy. Corazon, Calumpit, Bulacan",
-    contact: "Phone No. (+63) 917-517-9241  •  TIN: 446-160-716-000",
-  },
   notes:
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi eleifend lobortis varius. Praesent orci est, finibus varius imperdiet et, accumsan id elit. Etiam dolor sapien, elementum eu molestie ut, eleifend vel nisl.",
 };
@@ -122,7 +116,7 @@ const InvoicePDF = ({ entity }: InvoicePDF) => {
           {/* Logo + Address */}
           <View style={{ flex: 1 }}>
             <PDFImage
-              src={logo}
+              src={company.logo}
               style={{
                 width: 160,
                 height: 50,
@@ -133,9 +127,9 @@ const InvoicePDF = ({ entity }: InvoicePDF) => {
               }}
             />
             <Text style={tw("text-[10px] mt-1")}>
-              {invoiceData.company.address}
+              {company.address}
             </Text>
-            <Text style={tw("text-[10px]")}>{invoiceData.company.contact}</Text>
+            <Text style={tw("text-[10px]")}>{company.contact}</Text>
           </View>
 
           {/* Title */}

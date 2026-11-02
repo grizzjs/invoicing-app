@@ -9,7 +9,7 @@ import {
 import { createTw } from "react-pdf-tailwind";
 
 import type { PurchaseOrderDto } from "@/api/models";
-import logo from "@/assets/logo.png";
+import { company } from "@/lib/company";
 import { formatDate } from "@/lib/format-date";
 import format from "@/lib/format-money";
 Font.register({
@@ -42,12 +42,6 @@ const tw = createTw({
 
 // ── Data ────────────────────────────────────────────────────────────────────
 const invoiceData = {
-  company: {
-    name: "ENGINE✕LABS",
-    tagline: "IT SOLUTIONS",
-    address: "359 Mc Arthur Hi-Way, Brgy. Corazon, Calumpit, Bulacan",
-    contact: "Phone No. (+63) 917-517-9241  •  TIN: 446-160-716-000",
-  },
   notes:
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi eleifend lobortis varius. Praesent orci est, finibus varius imperdiet et, accumsan id elit. Etiam dolor sapien, elementum eu molestie ut, eleifend vel nisl.",
 };
@@ -69,7 +63,7 @@ const PurchaseOrderPDF = ({ entity }: PurchaseOrderPDF) => (
       {/* Header */}
       <View style={tw("flex flex-col")}>
         <PDFImage
-          src={logo}
+          src={company.logo}
           style={{
             width: 160,
             height: 50,
@@ -80,9 +74,9 @@ const PurchaseOrderPDF = ({ entity }: PurchaseOrderPDF) => (
           }}
         />
         <Text style={tw("text-[10px] mt-1")}>
-          {invoiceData.company.address}
+          {company.address}
         </Text>
-        <Text style={tw("text-[10px]")}>{invoiceData.company.contact}</Text>
+        <Text style={tw("text-[10px]")}>{company.contact}</Text>
       </View>
 
       <View style={tw("border-t border-gray-300 mt-2 mb-6")} />

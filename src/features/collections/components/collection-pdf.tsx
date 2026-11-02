@@ -9,7 +9,7 @@ import {
 import { createTw } from "react-pdf-tailwind";
 
 import type { CollectionDto } from "@/api/models";
-import logo from "@/assets/logo.png";
+import { company } from "@/lib/company";
 import { formatDate } from "@/lib/format-date";
 import format from "@/lib/format-money";
 
@@ -43,11 +43,6 @@ const tw = createTw({
 });
 
 // ── Data ────────────────────────────────────────────────────────────────────
-const companyData = {
-  address: "359 Mc Arthur Hi-Way, Brgy. Corazon, Calumpit, Bulacan",
-  contact: "Phone No. (+63) 917-517-9241  •  TIN: 446-160-716-000",
-};
-
 type CollectionPDFProps = {
   entity: CollectionDto;
 };
@@ -70,7 +65,7 @@ const CollectionPDF = ({ entity }: CollectionPDFProps) => {
           {/* Logo + Address */}
           <View style={{ flex: 1 }}>
             <PDFImage
-              src={logo}
+              src={company.logo}
               style={{
                 width: 160,
                 height: 50,
@@ -80,8 +75,8 @@ const CollectionPDF = ({ entity }: CollectionPDFProps) => {
                 alignSelf: "flex-start",
               }}
             />
-            <Text style={tw("text-[10px] mt-1")}>{companyData.address}</Text>
-            <Text style={tw("text-[10px]")}>{companyData.contact}</Text>
+            <Text style={tw("text-[10px] mt-1")}>{company.address}</Text>
+            <Text style={tw("text-[10px]")}>{company.contact}</Text>
           </View>
 
           {/* Title */}
