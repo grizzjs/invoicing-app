@@ -3,9 +3,15 @@ import {
   useGetDeliveryReceipts,
 } from "@/api/endpoints/delivery-receipts/delivery-receipts";
 import { useCreateInvoice } from "@/api/endpoints/invoices/invoices";
+import {
+  getGetJobOrderQueryKey,
+  useGetJobOrders,
+} from "@/api/endpoints/job-orders/job-orders";
 import { useGetPurchaseOrders } from "@/api/endpoints/purchase-orders/purchase-orders";
 import type { DeliveryReceiptDto } from "@/api/models/deliveryReceiptDto";
 import { DeliveryReceiptDtoStatus } from "@/api/models/deliveryReceiptDtoStatus";
+import type { JobOrderDto } from "@/api/models/jobOrderDto";
+import { JobOrderDtoStatus } from "@/api/models/jobOrderDtoStatus";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -45,6 +51,7 @@ import {
 import { useAppForm } from "@/features/common/hooks/form";
 import { uploadFiles } from "@/features/common/lib/upload-files";
 import { formOptions } from "@tanstack/react-form";
+import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { Archive, ChevronDown, ChevronRight, Info, Search } from "lucide-react";
 import { useState } from "react";
@@ -74,10 +81,11 @@ const terms = [
   { key: "90", value: "90 days" },
 ];
 
-type DocumentType = "purchaseOrder" | "deliveryReceipt";
+type DocumentType = "purchaseOrder" | "jobOrder" | "deliveryReceipt";
 
 const documentTypes: { key: DocumentType; value: string }[] = [
   { key: "purchaseOrder", value: "Purchase Order" },
+  { key: "jobOrder", value: "Job Order" },
   { key: "deliveryReceipt", value: "Delivery Receipt" },
 ];
 
@@ -86,6 +94,11 @@ const isEligible = (dr: DeliveryReceiptDto) =>
   !dr.invoice &&
   (dr.status === DeliveryReceiptDtoStatus.Delivered ||
     dr.status === DeliveryReceiptDtoStatus.Shipped);
+
+const isJobOrderEligible = (jo: JobOrderDto) =>
+  !jo.invoice &&
+  (jo.status === JobOrderDtoStatus.Approved ||
+    jo.status === JobOrderDtoStatus.Finalized);
 
 const formatDate = (value: string) =>
   new Date(value).toLocaleDateString("en-US", {
@@ -131,6 +144,8 @@ interface InvoiceDialogProps {
   // Invoices this purchase order's delivery receipts and hides the document
   // picker.
   purchaseOrderId?: number;
+  // Invoices this job order directly and hides the document picker.
+  jobOrderId?: number;
   // Invoices just this delivery receipt and hides the document picker.
   deliveryReceiptId?: number;
 }
@@ -139,6 +154,7 @@ export default function InvoiceDialog({
   open,
   onOpenChange,
   purchaseOrderId,
+  jobOrderId,
   deliveryReceiptId,
 }: InvoiceDialogProps) {
   return (
@@ -157,6 +173,7 @@ export default function InvoiceDialog({
         <InvoiceForm
           onClose={() => onOpenChange(false)}
           purchaseOrderId={purchaseOrderId}
+          jobOrderId={jobOrderId}
           deliveryReceiptId={deliveryReceiptId}
         />
       </DialogContent>
@@ -172,7 +189,7 @@ function EmptyState() {
       </div>
       <p className="text-base">No eligible documents found</p>
       <p className="max-w-xs text-sm text-muted-foreground">
-        Only approved purchase order and delivered delivery receipt without
+        Only approved purchase orders, job orders, and delivered delivery receipts without
         invoice are shown
       </p>
     </div>
@@ -182,23 +199,33 @@ function EmptyState() {
 function InvoiceForm({
   onClose,
   purchaseOrderId,
+  jobOrderId,
   deliveryReceiptId,
 }: {
   onClose: () => void;
   purchaseOrderId?: number;
+  jobOrderId?: number;
   deliveryReceiptId?: number;
 }) {
-  const { data: purchaseOrders, isLoading } = useGetPurchaseOrders();
+  const { data: purchaseOrders = [], isLoading: isLoadingPOs } =
+    useGetPurchaseOrders();
   // Delivery receipts nested in purchase orders don't include notes, so they
   // are looked up from the delivery receipts list to make them searchable.
-  const { data: deliveryReceipts, isLoading: isLoadingReceipts } =
+  const { data: deliveryReceipts = [], isLoading: isLoadingReceipts } =
     useGetDeliveryReceipts();
+  const { data: jobOrders = [], isLoading: isLoadingJobOrders } =
+    useGetJobOrders();
   const { mutate, isPending } = useCreateInvoice();
+  const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
-  const [documentType, setDocumentType] =
-    useState<DocumentType>("purchaseOrder");
+  const [documentType, setDocumentType] = useState<DocumentType>(
+    jobOrderId !== undefined ? "jobOrder" : "purchaseOrder",
+  );
   const [selectedPurchaseOrder, setSelectedPurchaseOrder] = useState(
     purchaseOrderId !== undefined ? String(purchaseOrderId) : "",
+  );
+  const [selectedJobOrder, setSelectedJobOrder] = useState(
+    jobOrderId !== undefined ? String(jobOrderId) : "",
   );
   const [selectedReceipts, setSelectedReceipts] = useState<number[]>([]);
   const [collapsed, setCollapsed] = useState<number[]>([]);
@@ -209,30 +236,51 @@ function InvoiceForm({
     ...registerFormOpts,
     onSubmit: ({ value }) => {
       const processed = schema.parse(value);
-      const deliveryReceipts =
-        deliveryReceiptId !== undefined
-          ? [deliveryReceiptId]
-          : documentType === "purchaseOrder"
-            ? purchaseOrders
-                .find((po) => po.id.toString() === selectedPurchaseOrder)
-                .deliveryReceipts.filter(isEligible)
-                .map((dr) => dr.id)
-            : selectedReceipts;
+      const targetJobOrderId =
+        jobOrderId !== undefined
+          ? jobOrderId
+          : documentType === "jobOrder"
+            ? Number(selectedJobOrder)
+            : undefined;
+
+      const deliveryReceiptsPayload =
+        targetJobOrderId !== undefined
+          ? undefined
+          : deliveryReceiptId !== undefined
+            ? [deliveryReceiptId]
+            : documentType === "purchaseOrder"
+              ? purchaseOrders
+                  .find((po) => po.id.toString() === selectedPurchaseOrder)
+                  ?.deliveryReceipts?.filter(isEligible)
+                  .map((dr) => dr.id) ?? []
+              : selectedReceipts;
+
       mutate(
         {
           data: {
             createDate: new Date().toISOString(),
             dueInDays: Number(processed.terms),
             notes: processed.notes,
-            deliveryReceipts,
+            ...(targetJobOrderId !== undefined
+              ? { jobOrder: targetJobOrderId }
+              : { deliveryReceipts: deliveryReceiptsPayload }),
           },
         },
         {
           onSuccess: async (data) => {
+            if (targetJobOrderId !== undefined) {
+              await queryClient.invalidateQueries({
+                queryKey: ["/job-orders"],
+              });
+              await queryClient.invalidateQueries({
+                queryKey: getGetJobOrderQueryKey(targetJobOrderId),
+              });
+            }
             const files = docs.getFiles();
             if (files.length > 0) {
               await uploadFiles("invoices", data.id, files);
             }
+            await queryClient.invalidateQueries({ queryKey: ["/invoices"] });
             navigate({ to: `/invoices/${data.id}` });
           },
         },
@@ -244,7 +292,8 @@ function InvoiceForm({
     },
   });
 
-  if (isLoading || isLoadingReceipts) return <div>Loading...</div>;
+  if (isLoadingPOs || isLoadingReceipts || isLoadingJobOrders)
+    return <div>Loading...</div>;
 
   const query = search.trim();
   const receiptNotes = new Map(
@@ -253,15 +302,32 @@ function InvoiceForm({
 
   // Purchase orders that still have at least one receipt to invoice.
   const eligiblePurchaseOrders = purchaseOrders
-    .map((po) => ({ ...po, eligible: po.deliveryReceipts.filter(isEligible) }))
+    .map((po) => ({
+      ...po,
+      eligible: (po.deliveryReceipts ?? []).filter(isEligible),
+    }))
     .filter((po) => po.eligible.length > 0);
+
+  const eligibleJobOrders = jobOrders.filter(isJobOrderEligible);
 
   const matches = (id: number, notes?: string | null) =>
     id.toString().includes(query) ||
     (notes ?? "").toLowerCase().includes(query.toLowerCase());
 
   const purchaseOrdersToList = eligiblePurchaseOrders
-    .filter((po) => matches(po.id, po.notes))
+    .filter(
+      (po) =>
+        matches(po.id, po.notes) ||
+        (po.customer?.name ?? "").toLowerCase().includes(query.toLowerCase()),
+    )
+    .slice(0, 10);
+
+  const jobOrdersToList = eligibleJobOrders
+    .filter(
+      (jo) =>
+        matches(jo.id, jo.notes) ||
+        (jo.customer?.name ?? "").toLowerCase().includes(query.toLowerCase()),
+    )
     .slice(0, 10);
 
   const groupsToList = eligiblePurchaseOrders
@@ -275,23 +341,31 @@ function InvoiceForm({
     .slice(0, 10);
 
   const isLocked =
-    purchaseOrderId !== undefined || deliveryReceiptId !== undefined;
+    purchaseOrderId !== undefined ||
+    jobOrderId !== undefined ||
+    deliveryReceiptId !== undefined;
+
   const lockedEligible =
     deliveryReceiptId !== undefined
       ? eligiblePurchaseOrders.some((po) =>
           po.eligible.some((dr) => dr.id === deliveryReceiptId),
         )
-      : eligiblePurchaseOrders.some((po) => po.id === purchaseOrderId);
+      : jobOrderId !== undefined
+        ? eligibleJobOrders.some((jo) => jo.id === jobOrderId)
+        : eligiblePurchaseOrders.some((po) => po.id === purchaseOrderId);
 
   const hasSelection = isLocked
     ? lockedEligible
     : documentType === "purchaseOrder"
       ? selectedPurchaseOrder !== ""
-      : selectedReceipts.length > 0;
+      : documentType === "jobOrder"
+        ? selectedJobOrder !== ""
+        : selectedReceipts.length > 0;
 
   const changeDocumentType = (value: DocumentType) => {
     setDocumentType(value);
     setSelectedPurchaseOrder("");
+    setSelectedJobOrder("");
     setSelectedReceipts([]);
   };
 
@@ -372,7 +446,9 @@ function InvoiceForm({
               <p className="text-sm text-muted-foreground">
                 {deliveryReceiptId !== undefined
                   ? `Delivery receipt ${deliveryReceiptId} cannot be invoiced. It must be shipped or delivered and not yet invoiced.`
-                  : `Purchase order ${purchaseOrderId} has no delivered or shipped delivery receipts left to invoice.`}
+                  : jobOrderId !== undefined
+                    ? `Job order ${jobOrderId} cannot be invoiced. It must be finalized or approved and not yet invoiced.`
+                    : `Purchase order ${purchaseOrderId} has no delivered or shipped delivery receipts left to invoice.`}
               </p>
             )
           ) : (
@@ -396,8 +472,9 @@ function InvoiceForm({
                         </button>
                       </TooltipTrigger>
                       <TooltipContent>
-                        Select a purchase order to invoice all of its delivered
-                        receipts, or pick individual delivery receipts.
+                        Select a purchase order to invoice its delivered
+                        receipts, a job order to invoice directly, or pick
+                        individual delivery receipts.
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -466,6 +543,40 @@ function InvoiceForm({
                             </span>
                             <span className="shrink-0 whitespace-nowrap text-sm text-muted-foreground">
                               {po.eligible.length} Delivery Receipt
+                            </span>
+                          </Label>
+                        ))}
+                      </RadioGroup>
+                    )
+                  ) : documentType === "jobOrder" ? (
+                    jobOrdersToList.length === 0 ? (
+                      <div className="h-72">
+                        <EmptyState />
+                      </div>
+                    ) : (
+                      <RadioGroup
+                        className="relative gap-0 pr-3"
+                        value={selectedJobOrder}
+                        onValueChange={setSelectedJobOrder}
+                      >
+                        {jobOrdersToList.map((jo) => (
+                          <Label
+                            key={jo.id}
+                            htmlFor={`jo-${jo.id}`}
+                            className="flex cursor-pointer items-center gap-3 border-b px-1 py-3 font-normal transition-colors hover:bg-muted/40"
+                          >
+                            <RadioGroupItem
+                              value={String(jo.id)}
+                              id={`jo-${jo.id}`}
+                            />
+                            <span className="w-28 shrink-0 text-base">
+                              <Highlight text={jo.id} query={query} />
+                            </span>
+                            <span className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
+                              {jo.customer?.name}
+                            </span>
+                            <span className="shrink-0 whitespace-nowrap text-sm text-muted-foreground">
+                              {(jo.lineItems ?? []).length} Line Items
                             </span>
                           </Label>
                         ))}

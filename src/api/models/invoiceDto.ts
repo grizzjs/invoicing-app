@@ -10,6 +10,7 @@ import type { CustomerDto } from './customerDto';
 import type { DeliveryReceiptDto } from './deliveryReceiptDto';
 import type { InvoiceDtoStatus } from './invoiceDtoStatus';
 import type { InvoiceDtoTerm } from './invoiceDtoTerm';
+import type { JobOrderDto } from './jobOrderDto';
 
 export interface InvoiceDto {
   /** Unique identifier of the invoice */
@@ -34,7 +35,9 @@ export interface InvoiceDto {
   /** Customer associated with the invoice */
   customer: CustomerDto;
   /** Delivery receipts associated with the invoice */
-  deliveryReceipts: DeliveryReceiptDto[];
+  deliveryReceipts?: DeliveryReceiptDto[];
   /** Collection associated with the invoice */
   collection: CollectionDto;
+  /** JobOrder associated with the invoice */
+  jobOrder?: JobOrderDto;
 }

@@ -61,6 +61,13 @@ type InvoicePDF = {
 // ── Component ───────────────────────────────────────────────────────────────
 const OfficialReceiptPDF = ({ entity }: InvoicePDF) => {
   const lineItems =
+    entity.jobOrder?.lineItems?.map((lineItem) => ({
+      name: lineItem.name,
+      description: lineItem.description,
+      quantity: lineItem.quantity,
+      unitPrice: lineItem.unitPrice,
+      amount: lineItem.quantity * lineItem.unitPrice,
+    })) ||
     entity.deliveryReceipts?.flatMap((delivery) => {
       return delivery.lineItems.map((lineItem) => {
         return {
@@ -71,7 +78,8 @@ const OfficialReceiptPDF = ({ entity }: InvoicePDF) => {
           amount: lineItem.quantity * lineItem.purchaseOrderLineItem.unitPrice,
         };
       });
-    }) || [];
+    }) ||
+    [];
 
   const totalAmount = lineItems.reduce(
     (result, current) => result + current.amount,

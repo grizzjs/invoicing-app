@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { FileText, Trash2 } from "lucide-react";
 import { useRef, useState } from "react";
 
-type SupportingDocumentsProps = {
+export type SupportingDocumentsProps = {
   existingFiles?: string[];
 };
 

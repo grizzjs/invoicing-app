@@ -2,6 +2,7 @@ import { getCollections } from "@/api/endpoints/collections/collections";
 import { getCustomers } from "@/api/endpoints/customers/customers";
 import { getDeliveryReceipts } from "@/api/endpoints/delivery-receipts/delivery-receipts";
 import { getInvoices } from "@/api/endpoints/invoices/invoices";
+import { getJobOrders } from "@/api/endpoints/job-orders/job-orders";
 import { getPurchaseOrders } from "@/api/endpoints/purchase-orders/purchase-orders";
 import {
   Command,
@@ -22,6 +23,7 @@ import { useDebounce } from "use-debounce";
 
 import entityToBadgeDelivery from "@/features/deliveries/lib/entity-to-badge";
 import entityToBadgeInvoice from "@/features/invoices/lib/entity-to-badge";
+import entityToBadgeJobOrder from "@/features/job-orders/lib/entity-to-badge";
 import entityToBadgePurchaseOrder from "@/features/purchase-orders/lib/entity-to-badge";
 import { Badge } from "../components/badge";
 
@@ -52,13 +54,17 @@ export function SearchCommand({ open, setOpen }: SearchCommand) {
           queryFn: () => getPurchaseOrders(params),
         },
         {
+          queryKey: ["jobOrders", search],
+          queryFn: () => getJobOrders(params),
+        },
+        {
           queryKey: ["collections", search],
           queryFn: () => getCollections(params),
         },
       ],
     });
 
-    const [customers, deliveries, invoices, purchaseOrders, collections] =
+    const [customers, deliveries, invoices, purchaseOrders, jobOrders, collections] =
       results.map((r) => r.data);
 
     return {
@@ -67,6 +73,7 @@ export function SearchCommand({ open, setOpen }: SearchCommand) {
       deliveries,
       invoices,
       purchaseOrders,
+      jobOrders,
       collections,
     };
   }
@@ -105,6 +112,9 @@ export function SearchCommand({ open, setOpen }: SearchCommand) {
         case "purchase-orders":
           entityToBadge = entityToBadgePurchaseOrder;
           break;
+        case "job-orders":
+          entityToBadge = entityToBadgeJobOrder;
+          break;
       }
 
       if (entityToBadge) {
@@ -139,6 +149,7 @@ export function SearchCommand({ open, setOpen }: SearchCommand) {
     deliveries,
     invoices,
     purchaseOrders,
+    jobOrders,
     collections,
   } = useGlobalSearch(search);
 
@@ -161,6 +172,7 @@ export function SearchCommand({ open, setOpen }: SearchCommand) {
               <CommandGroup heading="Delivery Receipts"></CommandGroup>
               <CommandGroup heading="Invoices"></CommandGroup>
               <CommandGroup heading="Purchase Orders"></CommandGroup>
+              <CommandGroup heading="Job Orders"></CommandGroup>
               <CommandGroup heading="Collections"></CommandGroup>
             </CommandList>
           </Command>
@@ -192,6 +204,9 @@ export function SearchCommand({ open, setOpen }: SearchCommand) {
             </CommandGroup>
             <CommandGroup heading="Purchase Orders">
               {purchaseOrders.map(generateCommandInput("purchase-orders"))}
+            </CommandGroup>
+            <CommandGroup heading="Job Orders">
+              {jobOrders.map(generateCommandInput("job-orders"))}
             </CommandGroup>
             <CommandGroup heading="Collections">
               {collections.map(generateCommandInput("collections"))}

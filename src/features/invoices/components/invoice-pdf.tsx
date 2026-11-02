@@ -62,11 +62,24 @@ type InvoicePDF = {
 
 // ── Component ───────────────────────────────────────────────────────────────
 const InvoicePDF = ({ entity }: InvoicePDF) => {
-  const poNumbers = uniq(
-    entity.deliveryReceipts.map((delivery) => delivery.purchaseOrder.id),
-  );
-  const deliveries = entity.deliveryReceipts.map((delivery) => delivery.id);
+  const poNumbers = entity.deliveryReceipts
+    ? uniq(
+        entity.deliveryReceipts
+          .map((delivery) => delivery.purchaseOrder?.id)
+          .filter(Boolean),
+      )
+    : [];
+  const deliveries = entity.deliveryReceipts
+    ? entity.deliveryReceipts.map((delivery) => delivery.id)
+    : [];
   const lineItems =
+    entity.jobOrder?.lineItems?.map((lineItem) => ({
+      name: lineItem.name,
+      description: lineItem.description,
+      quantity: lineItem.quantity,
+      unitPrice: lineItem.unitPrice,
+      amount: lineItem.quantity * lineItem.unitPrice,
+    })) ||
     entity.deliveryReceipts?.flatMap((delivery) => {
       return delivery.lineItems.map((lineItem) => {
         return {
@@ -77,7 +90,8 @@ const InvoicePDF = ({ entity }: InvoicePDF) => {
           amount: lineItem.quantity * lineItem.purchaseOrderLineItem.unitPrice,
         };
       });
-    }) || [];
+    }) ||
+    [];
 
   const totalAmount = lineItems.reduce(
     (result, current) => result + current.amount,
@@ -160,22 +174,31 @@ const InvoicePDF = ({ entity }: InvoicePDF) => {
               <Text style={tw("flex-1")}>Invoice No.</Text>
               <Text style={tw("text-right")}>{entity.id}</Text>
             </View>
-            {poNumbers.map((id, index) => (
+            {entity.jobOrder ? (
               <View style={tw("flex-row")}>
-                <Text style={tw("flex-1")}>
-                  {index === 0 ? "Purchase Order No." : ""}
-                </Text>
-                <Text style={tw("text-right")}>{id}</Text>
+                <Text style={tw("flex-1")}>Job Order No.</Text>
+                <Text style={tw("text-right")}>{entity.jobOrder.id}</Text>
               </View>
-            ))}
-            {deliveries.map((id, index) => (
-              <View style={tw("flex-row")}>
-                <Text style={tw("flex-1")}>
-                  {index === 0 ? "Delivery No." : ""}
-                </Text>
-                <Text style={tw("text-right")}>{id}</Text>
-              </View>
-            ))}
+            ) : (
+              <>
+                {poNumbers.map((id, index) => (
+                  <View key={`po-${index}`} style={tw("flex-row")}>
+                    <Text style={tw("flex-1")}>
+                      {index === 0 ? "Purchase Order No." : ""}
+                    </Text>
+                    <Text style={tw("text-right")}>{id}</Text>
+                  </View>
+                ))}
+                {deliveries.map((id, index) => (
+                  <View key={`dr-${index}`} style={tw("flex-row")}>
+                    <Text style={tw("flex-1")}>
+                      {index === 0 ? "Delivery No." : ""}
+                    </Text>
+                    <Text style={tw("text-right")}>{id}</Text>
+                  </View>
+                ))}
+              </>
+            )}
             <View style={tw("flex-row")}>
               <Text style={tw("flex-1")}>Terms</Text>
               <Text style={tw("text-right")}>{entity.term}</Text>

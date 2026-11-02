@@ -26,12 +26,16 @@ import type {
 
 import type {
   CreateDeliveryReceiptLineItemDto,
+  CreateJobOrderLineItemDto,
   CreatePurchaseOrderLineItemDto,
   DeliveryReceiptLineItemDto,
   GetLineItemsByDeliveryReceiptParams,
+  GetLineItemsByJobOrderParams,
   GetLineItemsByPurchaseOrderParams,
+  JobOrderLineItemDto,
   PurchaseOrderLineItemDto,
   UpdateDeliveryReceiptLineItemDto,
+  UpdateJobOrderLineItemDto,
   UpdatePurchaseOrderLineItemDto
 } from '../../models';
 
@@ -399,6 +403,366 @@ const {mutation: mutationOptions} = options ?
         TContext
       > => {
       return useMutation(getDeletePurchaseOrderLineItemMutationOptions(options), queryClient);
+    }
+    export const getLineItemsByJobOrder = (
+    jobOrderId: number,
+    params?: GetLineItemsByJobOrderParams,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<JobOrderLineItemDto>(
+      {url: `/job-orders/${jobOrderId}/line-items`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+
+
+
+
+export const getGetLineItemsByJobOrderQueryKey = (jobOrderId: number,
+    params?: GetLineItemsByJobOrderParams,) => {
+    return [
+    `/job-orders/${jobOrderId}/line-items`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetLineItemsByJobOrderQueryOptions = <TData = Awaited<ReturnType<typeof getLineItemsByJobOrder>>, TError = unknown>(jobOrderId: number,
+    params?: GetLineItemsByJobOrderParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getLineItemsByJobOrder>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetLineItemsByJobOrderQueryKey(jobOrderId,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getLineItemsByJobOrder>>> = ({ signal }) => getLineItemsByJobOrder(jobOrderId,params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: jobOrderId !== null && jobOrderId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getLineItemsByJobOrder>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetLineItemsByJobOrderQueryResult = NonNullable<Awaited<ReturnType<typeof getLineItemsByJobOrder>>>
+export type GetLineItemsByJobOrderQueryError = unknown
+
+
+export function useGetLineItemsByJobOrder<TData = Awaited<ReturnType<typeof getLineItemsByJobOrder>>, TError = unknown>(
+ jobOrderId: number,
+    params: undefined |  GetLineItemsByJobOrderParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getLineItemsByJobOrder>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getLineItemsByJobOrder>>,
+          TError,
+          Awaited<ReturnType<typeof getLineItemsByJobOrder>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetLineItemsByJobOrder<TData = Awaited<ReturnType<typeof getLineItemsByJobOrder>>, TError = unknown>(
+ jobOrderId: number,
+    params?: GetLineItemsByJobOrderParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getLineItemsByJobOrder>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getLineItemsByJobOrder>>,
+          TError,
+          Awaited<ReturnType<typeof getLineItemsByJobOrder>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetLineItemsByJobOrder<TData = Awaited<ReturnType<typeof getLineItemsByJobOrder>>, TError = unknown>(
+ jobOrderId: number,
+    params?: GetLineItemsByJobOrderParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getLineItemsByJobOrder>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetLineItemsByJobOrder<TData = Awaited<ReturnType<typeof getLineItemsByJobOrder>>, TError = unknown>(
+ jobOrderId: number,
+    params?: GetLineItemsByJobOrderParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getLineItemsByJobOrder>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetLineItemsByJobOrderQueryOptions(jobOrderId,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+export const createJobOrderLineItem = (
+    jobOrderId: number,
+    createJobOrderLineItemDto: CreateJobOrderLineItemDto,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<JobOrderLineItemDto>(
+      {url: `/job-orders/${jobOrderId}/line-items`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: createJobOrderLineItemDto, signal
+    },
+      );
+    }
+
+
+
+export const getCreateJobOrderLineItemMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createJobOrderLineItem>>, TError,{jobOrderId: number;data: CreateJobOrderLineItemDto}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof createJobOrderLineItem>>, TError,{jobOrderId: number;data: CreateJobOrderLineItemDto}, TContext> => {
+
+const mutationKey = ['createJobOrderLineItem'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createJobOrderLineItem>>, {jobOrderId: number;data: CreateJobOrderLineItemDto}> = (props) => {
+          const {jobOrderId,data} = props ?? {};
+
+          return  createJobOrderLineItem(jobOrderId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateJobOrderLineItemMutationResult = NonNullable<Awaited<ReturnType<typeof createJobOrderLineItem>>>
+    export type CreateJobOrderLineItemMutationBody = CreateJobOrderLineItemDto
+    export type CreateJobOrderLineItemMutationError = unknown
+
+    export const useCreateJobOrderLineItem = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createJobOrderLineItem>>, TError,{jobOrderId: number;data: CreateJobOrderLineItemDto}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createJobOrderLineItem>>,
+        TError,
+        {jobOrderId: number;data: CreateJobOrderLineItemDto},
+        TContext
+      > => {
+      return useMutation(getCreateJobOrderLineItemMutationOptions(options), queryClient);
+    }
+    export const getLineItemsByJobOrderAndId = (
+    jobOrderId: number,
+    id: number,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<JobOrderLineItemDto[]>(
+      {url: `/job-orders/${jobOrderId}/line-items/${id}`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
+
+export const getGetLineItemsByJobOrderAndIdQueryKey = (jobOrderId: number,
+    id: number,) => {
+    return [
+    `/job-orders/${jobOrderId}/line-items/${id}`
+    ] as const;
+    }
+
+
+export const getGetLineItemsByJobOrderAndIdQueryOptions = <TData = Awaited<ReturnType<typeof getLineItemsByJobOrderAndId>>, TError = unknown>(jobOrderId: number,
+    id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getLineItemsByJobOrderAndId>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetLineItemsByJobOrderAndIdQueryKey(jobOrderId,id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getLineItemsByJobOrderAndId>>> = ({ signal }) => getLineItemsByJobOrderAndId(jobOrderId,id, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: jobOrderId !== null && jobOrderId !== undefined && id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getLineItemsByJobOrderAndId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetLineItemsByJobOrderAndIdQueryResult = NonNullable<Awaited<ReturnType<typeof getLineItemsByJobOrderAndId>>>
+export type GetLineItemsByJobOrderAndIdQueryError = unknown
+
+
+export function useGetLineItemsByJobOrderAndId<TData = Awaited<ReturnType<typeof getLineItemsByJobOrderAndId>>, TError = unknown>(
+ jobOrderId: number,
+    id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getLineItemsByJobOrderAndId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getLineItemsByJobOrderAndId>>,
+          TError,
+          Awaited<ReturnType<typeof getLineItemsByJobOrderAndId>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetLineItemsByJobOrderAndId<TData = Awaited<ReturnType<typeof getLineItemsByJobOrderAndId>>, TError = unknown>(
+ jobOrderId: number,
+    id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getLineItemsByJobOrderAndId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getLineItemsByJobOrderAndId>>,
+          TError,
+          Awaited<ReturnType<typeof getLineItemsByJobOrderAndId>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetLineItemsByJobOrderAndId<TData = Awaited<ReturnType<typeof getLineItemsByJobOrderAndId>>, TError = unknown>(
+ jobOrderId: number,
+    id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getLineItemsByJobOrderAndId>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetLineItemsByJobOrderAndId<TData = Awaited<ReturnType<typeof getLineItemsByJobOrderAndId>>, TError = unknown>(
+ jobOrderId: number,
+    id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getLineItemsByJobOrderAndId>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetLineItemsByJobOrderAndIdQueryOptions(jobOrderId,id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+export const updateJobOrderLineItem = (
+    jobOrderId: number,
+    id: number,
+    updateJobOrderLineItemDto: UpdateJobOrderLineItemDto,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<JobOrderLineItemDto>(
+      {url: `/job-orders/${jobOrderId}/line-items/${id}`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: updateJobOrderLineItemDto, signal
+    },
+      );
+    }
+
+
+
+export const getUpdateJobOrderLineItemMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateJobOrderLineItem>>, TError,{jobOrderId: number;id: number;data: UpdateJobOrderLineItemDto}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof updateJobOrderLineItem>>, TError,{jobOrderId: number;id: number;data: UpdateJobOrderLineItemDto}, TContext> => {
+
+const mutationKey = ['updateJobOrderLineItem'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateJobOrderLineItem>>, {jobOrderId: number;id: number;data: UpdateJobOrderLineItemDto}> = (props) => {
+          const {jobOrderId,id,data} = props ?? {};
+
+          return  updateJobOrderLineItem(jobOrderId,id,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateJobOrderLineItemMutationResult = NonNullable<Awaited<ReturnType<typeof updateJobOrderLineItem>>>
+    export type UpdateJobOrderLineItemMutationBody = UpdateJobOrderLineItemDto
+    export type UpdateJobOrderLineItemMutationError = unknown
+
+    export const useUpdateJobOrderLineItem = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateJobOrderLineItem>>, TError,{jobOrderId: number;id: number;data: UpdateJobOrderLineItemDto}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateJobOrderLineItem>>,
+        TError,
+        {jobOrderId: number;id: number;data: UpdateJobOrderLineItemDto},
+        TContext
+      > => {
+      return useMutation(getUpdateJobOrderLineItemMutationOptions(options), queryClient);
+    }
+    export const deleteJobOrderLineItem = (
+    jobOrderId: number,
+    id: number,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<JobOrderLineItemDto>(
+      {url: `/job-orders/${jobOrderId}/line-items/${id}`, method: 'DELETE', signal
+    },
+      );
+    }
+
+
+
+export const getDeleteJobOrderLineItemMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteJobOrderLineItem>>, TError,{jobOrderId: number;id: number}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof deleteJobOrderLineItem>>, TError,{jobOrderId: number;id: number}, TContext> => {
+
+const mutationKey = ['deleteJobOrderLineItem'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteJobOrderLineItem>>, {jobOrderId: number;id: number}> = (props) => {
+          const {jobOrderId,id} = props ?? {};
+
+          return  deleteJobOrderLineItem(jobOrderId,id,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteJobOrderLineItemMutationResult = NonNullable<Awaited<ReturnType<typeof deleteJobOrderLineItem>>>
+
+    export type DeleteJobOrderLineItemMutationError = unknown
+
+    export const useDeleteJobOrderLineItem = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteJobOrderLineItem>>, TError,{jobOrderId: number;id: number}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteJobOrderLineItem>>,
+        TError,
+        {jobOrderId: number;id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteJobOrderLineItemMutationOptions(options), queryClient);
     }
     export const getLineItemsByDeliveryReceipt = (
     deliveryReceiptId: number,
