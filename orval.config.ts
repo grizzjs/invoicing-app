@@ -1,6 +1,6 @@
 module.exports = {
   "invoicing-api": {
-    input: "http://localhost:3000/api-json", // Your NestJS API URL
+    input: process.env.ORVAL_INPUT ?? "http://localhost:3000/api-json", // Your NestJS API URL
     output: {
       mode: "tags-split", // 👈 Splits files by NestJS ApiTags
       target: "./src/api/endpoints", // 👈 Creates a folder instead of a single file
