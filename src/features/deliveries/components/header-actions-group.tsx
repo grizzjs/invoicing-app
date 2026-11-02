@@ -2,9 +2,11 @@ import {
   getGetDeliveryReceiptQueryKey,
   useUpdateDeliveryReceipt,
 } from "@/api/endpoints/delivery-receipts/delivery-receipts";
+import { useGetPurchaseOrder } from "@/api/endpoints/purchase-orders/purchase-orders";
 import type { DeliveryReceiptDto } from "@/api/models";
 import { Button } from "@/components/ui/button";
 import { HeaderActions } from "@/components/ui/header-actions";
+import InvoiceDialog from "@/features/invoices/components/invoice-dialog";
 import ConfirmDialog from "@/features/purchase-orders/components/confirm-dialog";
 import isIn from "@/lib/is-in";
 import { useQueryClient } from "@tanstack/react-query";
@@ -33,6 +35,17 @@ export function HeaderActionsGroup({
     useUpdateDeliveryReceipt();
   const queryClient = useQueryClient();
   const [confirming, setConfirming] = useState(false);
+  const [creatingInvoice, setCreatingInvoice] = useState(false);
+
+  // The delivery receipt itself doesn't say whether it was invoiced, but the
+  // deliveries listed on its purchase order's line items do.
+  const { data: purchaseOrder } = useGetPurchaseOrder(
+    deliveryReceipt.purchaseOrder.id,
+  );
+  const invoiced = purchaseOrder?.lineItems
+    .flatMap((lineItem) => lineItem.deliveries)
+    .find((delivery) => delivery.deliveryReceipt?.id === deliveryReceipt.id)
+    ?.deliveryReceipt.invoice;
 
   const nextStatus = nextStatuses[deliveryReceipt.status];
 
@@ -56,9 +69,13 @@ export function HeaderActionsGroup({
         {nextStatus && (
           <Button onClick={() => setConfirming(true)}>Update Progress</Button>
         )}
-        {isIn([Status.Shipped, Status.Delivered], deliveryReceipt.status) && (
-          <Button variant="outline">Create Sales Invoice</Button>
-        )}
+        {isIn([Status.Shipped, Status.Delivered], deliveryReceipt.status) &&
+          purchaseOrder &&
+          !invoiced && (
+            <Button variant="outline" onClick={() => setCreatingInvoice(true)}>
+              Create Sales Invoice
+            </Button>
+          )}
       </HeaderActions>
       <div className="h-5 w-px bg-gray-300" />
       <HeaderActions>
@@ -77,6 +94,12 @@ export function HeaderActionsGroup({
           </Link>
         </Button>
       </HeaderActions>
+
+      <InvoiceDialog
+        open={creatingInvoice}
+        onOpenChange={setCreatingInvoice}
+        deliveryReceiptId={deliveryReceipt.id}
+      />
 
       {nextStatus && (
         <ConfirmDialog

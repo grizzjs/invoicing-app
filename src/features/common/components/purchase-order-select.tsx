@@ -60,9 +60,14 @@ export default function PurchaseOrderSelect({
       )}
       <Combobox
         disabled={disabled}
+        filter={null}
         items={purchaseOrders
-          .filter((purchaseOrder) =>
-            purchaseOrder.id.toString().includes(search),
+          .filter(
+            (purchaseOrder) =>
+              purchaseOrder.id.toString().includes(search) ||
+              (purchaseOrder.notes ?? "")
+                .toLowerCase()
+                .includes(search.toLowerCase()),
           )
           .slice(0, 5)}
         itemToStringLabel={(purchaseOrder) => String(purchaseOrder.id)}

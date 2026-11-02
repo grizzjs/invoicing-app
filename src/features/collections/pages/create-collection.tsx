@@ -333,17 +333,17 @@ export default function CreateCollectionPage() {
                       <Table>
                         <TableHeader>
                           <TableRow className="bg-muted/50">
-                            <TableHead className="w-[15%]">
+                            <TableHead className="w-[19%]">
                               Invoice Number
                             </TableHead>
-                            <TableHead className="w-[15%]">
+                            <TableHead className="w-[19%]">
                               Date Created
                             </TableHead>
-                            <TableHead className="w-[15%]">
+                            <TableHead className="w-[19%]">
                               Payment Terms
                             </TableHead>
-                            <TableHead className="w-[25%]">Due Date</TableHead>
-                            <TableHead className="w-[25%]">Amount</TableHead>
+                            <TableHead className="w-[19%]">Due Date</TableHead>
+                            <TableHead className="w-[19%]">Amount</TableHead>
                             <TableHead className="w-[5%]" />
                           </TableRow>
                         </TableHeader>

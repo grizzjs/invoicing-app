@@ -1,5 +1,6 @@
 import { Badge } from "@/features/common/components/badge";
 import entityToBadge from "@/features/deliveries/lib/entity-to-badge";
+import { Link } from "@tanstack/react-router";
 import { type ColumnDef } from "@tanstack/react-table";
 
 export type LineItemDelivery = {
@@ -12,6 +13,11 @@ export const columns: ColumnDef<LineItemDelivery>[] = [
   {
     accessorKey: "id",
     header: "Delivery No.",
+    cell: ({ row }) => (
+      <Link to={`/deliveries/${row.original.id}`} className="underline">
+        {row.original.id}
+      </Link>
+    ),
   },
   {
     header: "Status",

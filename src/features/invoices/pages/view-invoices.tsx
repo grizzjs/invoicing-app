@@ -112,6 +112,7 @@ export default function ViewInvoicesPage() {
                 : `${files.length} ${files.length === 1 ? "File" : "Files"}`}
             </button>
           </DetailProperty>
+          <DetailProperty header="Notes" value={invoice.notes || "-"} />
         </DetailsCard>
         <ProgressSummary title="Summary">
           <div>
@@ -121,12 +122,14 @@ export default function ViewInvoicesPage() {
             <p className="text-sm text-muted-foreground mb-5">Amount</p>
           </div>
           <div className="grid grid-cols-2 grid-rows-2 gap-2">
-            <Key>Date Paid</Key>
-            <Value className="justify-self-end">
-              {formatDate("2026-01-01T00:00:00Z")}
-            </Value>
             {invoice.status !== InvoiceDtoStatus.Unpaid && (
               <>
+                <Key>Date Paid</Key>
+                <Value className="justify-self-end">
+                  {invoice.collection
+                    ? formatDate(invoice.collection.createDate)
+                    : "-"}
+                </Value>
                 <Key>Collection Number</Key>
                 <Link to={`/collections/${invoice.collection?.id}`}>
                   <span className="underline">
@@ -158,6 +161,7 @@ export default function ViewInvoicesPage() {
           columns={columns}
           enableSearch={true}
           className="col-span-3"
+          defaultSorting={[{ id: "name", desc: false }]}
         />
       </div>
 

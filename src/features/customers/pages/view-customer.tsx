@@ -63,7 +63,12 @@ export default function ViewCustomerPage() {
 
         {/* Invoice Table */}
 
-        <DataTable data={invoices} columns={columns} enablePagination={true} />
+        <DataTable
+          data={invoices}
+          columns={columns}
+          enablePagination={true}
+          defaultSorting={[{ id: "createDate", desc: true }]}
+        />
       </div>
     </main>
   );

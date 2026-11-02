@@ -32,6 +32,7 @@ const deliverySchema = z.object({
   tin: z.string().regex(/^\d{3}-\d{3}-\d{3}-\d{5}$/, {
     message: "TIN must follow the format: XXX-XXX-XXX-XXXXX",
   }),
+  notes: z.string(),
   lineItems: z
     .object({
       // Purchase order line item being delivered.
@@ -63,6 +64,8 @@ type DeliveryFormProps = {
   lineItemOptions: LineItemOption[];
   defaultValues: DeliveryFormValues;
   cancelTo: string;
+  // The API can only save notes when a delivery is created.
+  showNotes?: boolean;
   existingFiles?: string[];
   onSubmit: (
     values: DeliveryFormValues,
@@ -76,6 +79,7 @@ export default function DeliveryForm({
   lineItemOptions,
   defaultValues,
   cancelTo,
+  showNotes = false,
   existingFiles = [],
   onSubmit,
 }: DeliveryFormProps) {
@@ -216,6 +220,21 @@ export default function DeliveryForm({
               </div>
             </div>
           </FieldSet>
+          {showNotes && (
+            <FieldSet>
+              <h2 className="text-xs font-normal text-gray-400">Details</h2>
+              <form.AppField name="notes">
+                {(field) => (
+                  <field.TextArea
+                    id="notes"
+                    label="Notes"
+                    orientation="horizontal"
+                    className="flex items-center gap-5"
+                  />
+                )}
+              </form.AppField>
+            </FieldSet>
+          )}
           <FieldSet className="grid grid-cols-1 gap-6">
             <section>
               <h2 className="text-xs font-normal text-gray-400 mb-5">

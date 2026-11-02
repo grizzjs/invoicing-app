@@ -6,6 +6,7 @@ import type { PurchaseOrderDto } from "@/api/models";
 import { Button } from "@/components/ui/button";
 import { HeaderActions } from "@/components/ui/header-actions";
 import PurchaseOrderDialog from "@/features/deliveries/components/purchase-order-dialog";
+import InvoiceDialog from "@/features/invoices/components/invoice-dialog";
 import isIn from "@/lib/is-in";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
@@ -30,6 +31,7 @@ export function HeaderActionsGroup({ purchaseOrder }: HeaderActionsGroupProps) {
     "finalize" | "approve" | "cancel" | null
   >(null);
   const [creatingDelivery, setCreatingDelivery] = useState(false);
+  const [creatingInvoice, setCreatingInvoice] = useState(false);
 
   const fullyDelivered = purchaseOrder.lineItems.every(
     (lineItem) =>
@@ -95,6 +97,11 @@ export function HeaderActionsGroup({ purchaseOrder }: HeaderActionsGroupProps) {
             Create Delivery Receipt
           </Button>
         )}
+        {isIn([Status.Approved], purchaseOrder.status) && fullyDelivered && (
+          <Button variant="outline" onClick={() => setCreatingInvoice(true)}>
+            Create Invoice
+          </Button>
+        )}
         {isIn([Status.Pending], purchaseOrder.status) && (
           <Button variant="outline">Create Sales Invoice</Button>
         )}
@@ -151,6 +158,11 @@ export function HeaderActionsGroup({ purchaseOrder }: HeaderActionsGroupProps) {
         open={creatingDelivery}
         onOpenChange={setCreatingDelivery}
         purchaseOrder={purchaseOrder}
+      />
+      <InvoiceDialog
+        open={creatingInvoice}
+        onOpenChange={setCreatingInvoice}
+        purchaseOrderId={purchaseOrder.id}
       />
     </>
   );

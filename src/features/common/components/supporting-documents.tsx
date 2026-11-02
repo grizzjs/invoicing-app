@@ -48,7 +48,9 @@ export function useSupportingDocuments(existingFiles: string[] = []) {
 
 type SupportingDocumentsSectionProps = ReturnType<
   typeof useSupportingDocuments
->;
+> & {
+  headingClassName?: string;
+};
 
 export function SupportingDocumentsSection({
   existingFiles,
@@ -57,10 +59,11 @@ export function SupportingDocumentsSection({
   addFileEntry,
   removeFileEntry,
   handleFileChange,
+  headingClassName = "text-xs font-normal text-gray-400 mb-4",
 }: SupportingDocumentsSectionProps) {
   return (
     <section>
-      <h2 className="text-xs font-normal text-gray-400 mb-4">
+      <h2 className={headingClassName}>
         Supporting Documents
       </h2>
       <div className="flex flex-col gap-3">

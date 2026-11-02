@@ -128,6 +128,7 @@ export default function EditDeliveryPage() {
             phoneNumber: customer.phoneNumber,
             email: customer.email,
             tin: customer.tin,
+            notes: delivery.notes ?? "",
             lineItems: delivery.lineItems.map((lineItem) => {
               const option = lineItemOptions.find(
                 (li) => li.id === lineItem.purchaseOrderLineItem.id,

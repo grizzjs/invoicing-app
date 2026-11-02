@@ -1,3 +1,7 @@
+import {
+  getGetFilesQueryKey,
+  useUploadFile,
+} from "@/api/endpoints/s3/s3";
 import { downloadFile } from "@/api/endpoints/s3/s3";
 import { Button } from "@/components/ui/button";
 import {
@@ -7,15 +11,20 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useQueryClient } from "@tanstack/react-query";
 import {
+  Download,
+  File,
   FileImage,
   FileSpreadsheet,
   FileText,
   FileType2,
   FileVideo,
-  Download,
-  File,
+  Loader2,
+  Paperclip,
+  Trash2,
 } from "lucide-react";
+import { useRef, useState } from "react";
 
 type AttachmentsDialogProps = {
   open: boolean;
@@ -79,13 +88,52 @@ export default function AttachmentsDialog({
   purchaseOrderId,
   files,
 }: AttachmentsDialogProps) {
+  const queryClient = useQueryClient();
+  const { mutateAsync: upload, isPending: isUploading } = useUploadFile();
+
+  const [stagedFiles, setStagedFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const picked = Array.from(e.target.files ?? []);
+    if (picked.length > 0) setStagedFiles((prev) => [...prev, ...picked]);
+    // reset input so the same file can be re-selected if removed
+    e.target.value = "";
+  };
+
+  const removeStagedFile = (idx: number) => {
+    setStagedFiles((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleUpload = async () => {
+    await Promise.all(
+      stagedFiles.map((file) =>
+        upload({
+          resource: "purchase-orders",
+          id: String(purchaseOrderId),
+          data: { file },
+        }),
+      ),
+    );
+    setStagedFiles([]);
+    queryClient.invalidateQueries({
+      queryKey: getGetFilesQueryKey("purchase-orders", String(purchaseOrderId)),
+    });
+  };
+
+  const handleClose = () => {
+    setStagedFiles([]);
+    onOpenChange(false);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(v) => !v && handleClose()}>
       <DialogContent showCloseButton={false} className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">Attachments</DialogTitle>
         </DialogHeader>
 
+        {/* Existing files */}
         <div className="flex flex-col">
           {files.map((key) => (
             <div
@@ -107,17 +155,80 @@ export default function AttachmentsDialog({
             </div>
           ))}
 
-          {files.length === 0 && (
+          {files.length === 0 && stagedFiles.length === 0 && (
             <p className="text-sm text-muted-foreground py-2">
               No attachments found.
             </p>
           )}
         </div>
 
-        <DialogFooter>
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>
+        {/* Staged (pending upload) files */}
+        {stagedFiles.length > 0 && (
+          <div className="flex flex-col gap-1 mt-1">
+            <p className="text-xs font-medium text-muted-foreground mb-1">
+              Ready to upload
+            </p>
+            {stagedFiles.map((f, idx) => (
+              <div
+                key={idx}
+                className="flex items-center justify-between py-2 px-3 rounded-md bg-gray-50 border border-gray-100"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  {fileIcon(f.name)}
+                  <span className="text-sm text-gray-700 truncate">
+                    {f.name}
+                  </span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-muted-foreground hover:text-destructive shrink-0"
+                  onClick={() => removeStagedFile(idx)}
+                  disabled={isUploading}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Hidden file input */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          className="hidden"
+          onChange={handleFileInputChange}
+        />
+
+        {/* Attach button */}
+        <button
+          type="button"
+          className="mt-1 flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={isUploading}
+        >
+          <Paperclip className="h-4 w-4" />
+          Attach files
+        </button>
+
+        <DialogFooter className="gap-2">
+          <Button variant="ghost" onClick={handleClose} disabled={isUploading}>
             Close
           </Button>
+          {stagedFiles.length > 0 && (
+            <Button onClick={handleUpload} disabled={isUploading}>
+              {isUploading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Uploading…
+                </>
+              ) : (
+                `Upload ${stagedFiles.length} ${stagedFiles.length === 1 ? "file" : "files"}`
+              )}
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

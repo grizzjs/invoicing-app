@@ -12,7 +12,7 @@ import { formatDate } from "@/lib/format-date";
 import { useParams } from "@tanstack/react-router";
 import { complement, filter, isNil, map, pipe, reduce, sum, uniq } from "ramda";
 import { useState } from "react";
-import AttachmentsDialog from "@/features/common/components/attachments-dialog";
+import AttachmentsDialog from "../components/attachments-dialog";
 import { HeaderActionsGroup } from "../components/view-header-actions-group";
 import entityToBadge from "../lib/entity-to-badge";
 
@@ -156,15 +156,19 @@ export default function ViewPurchaseOrderPage() {
           />
         </ProgressSummary>
         <div className="col-span-3">
-          <DataTable data={lineItems} columns={columns} enableSearch={true} />
+          <DataTable
+            data={lineItems}
+            columns={columns}
+            enableSearch={true}
+            defaultSorting={[{ id: "name", desc: false }]}
+          />
         </div>
       </div>
 
       <AttachmentsDialog
         open={attachmentsOpen}
         onOpenChange={setAttachmentsOpen}
-        resource="purchase-orders"
-        resourceId={purchaseOrder.id}
+        purchaseOrderId={purchaseOrder.id}
         files={files}
       />
     </main>

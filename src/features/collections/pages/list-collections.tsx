@@ -41,6 +41,7 @@ export default function ListCollectionsPage() {
           columns={columns}
           data={collectionTableRows}
           enableSearch={true}
+          defaultSorting={[{ id: "id", desc: true }]}
         />
       </div>
     </main>

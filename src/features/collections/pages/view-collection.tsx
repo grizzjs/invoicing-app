@@ -59,6 +59,7 @@ export default function ViewCollectionPage() {
                 : `${files.length} ${files.length === 1 ? "File" : "Files"}`}
             </button>
           </DetailProperty>
+          <DetailProperty header="Notes" value={collection.notes || "-"} />
         </DetailsCard>
         <ProgressSummary title="Summary">
           <div>
@@ -84,6 +85,7 @@ export default function ViewCollectionPage() {
           columns={columns}
           enableSearch={true}
           className="col-span-3"
+          defaultSorting={[{ id: "id", desc: true }]}
         />
       </div>
 

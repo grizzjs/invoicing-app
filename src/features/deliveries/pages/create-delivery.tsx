@@ -52,12 +52,14 @@ export default function CreateDeliveryPage() {
         createDate={today()}
         lineItemOptions={lineItemOptions}
         cancelTo="/deliveries"
+        showNotes
         defaultValues={{
           customer: customer.name,
           address: customer.address,
           phoneNumber: customer.phoneNumber,
           email: customer.email,
           tin: customer.tin,
+          notes: "",
           lineItems: lineItemOptions.filter((li) => ids.includes(li.id)),
         }}
         onSubmit={async (values, files) => {
@@ -66,6 +68,7 @@ export default function CreateDeliveryPage() {
               data: {
                 purchaseOrder: { id: purchaseOrderId },
                 createDate: new Date().toISOString(),
+                notes: values.notes,
                 lineItems: values.lineItems.map((li) => ({
                   quantity: li.deliveryQuantity,
                   purchaseOrderLineItem: { id: li.id },
