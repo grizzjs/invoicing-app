@@ -3,12 +3,9 @@ import { isAuthenticated } from "@/lib/auth";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/login")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    redirect: typeof search.redirect === "string" ? search.redirect : undefined,
-  }),
-  beforeLoad: ({ search }) => {
+  beforeLoad: () => {
     if (isAuthenticated()) {
-      throw redirect({ to: search.redirect ?? "/dashboard" });
+      throw redirect({ to: "/dashboard" });
     }
   },
   component: LoginPage,

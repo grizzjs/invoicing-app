@@ -15,11 +15,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { login } from "@/lib/auth";
 import { company } from "@/lib/company";
-import { useNavigate, useSearch } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 
 export default function LoginPage() {
-  const { redirect: redirectTo } = useSearch({ from: "/login" });
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -32,7 +31,7 @@ export default function LoginPage() {
     setSubmitting(true);
     try {
       await login({ email, password });
-      await navigate({ to: redirectTo ?? "/dashboard" });
+      await navigate({ to: "/dashboard" });
     } catch {
       setError("Invalid email or password");
     } finally {

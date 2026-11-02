@@ -9,11 +9,7 @@ export const Route = createRootRoute({
   // Runs for every route: redirect to /login unless the user is signed in.
   beforeLoad: ({ location }) => {
     if (location.pathname !== "/login" && !isAuthenticated()) {
-      throw redirect({
-        to: "/login",
-        // Root route types can't see /login's search schema, hence the cast.
-        search: { redirect: location.href } as never,
-      });
+      throw redirect({ to: "/login" });
     }
   },
   component: () => (
