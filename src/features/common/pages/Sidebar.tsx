@@ -4,12 +4,14 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { Kbd } from "@/components/ui/kbd";
-import { Link } from "@tanstack/react-router";
+import { logout } from "@/lib/auth";
+import { Link, useNavigate } from "@tanstack/react-router";
 import {
   Archive,
   ClipboardList,
   FileText,
   LayoutDashboard,
+  LogOut,
   SearchIcon,
   ShoppingCart,
   Truck,
@@ -68,6 +70,12 @@ export function NavItem({ label, icon, href, active }: NavItemProps) {
 
 export function Sidebar() {
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const onLogout = () => {
+    logout();
+    navigate({ to: "/login" });
+  };
 
   return (
     <aside className="w-[260px] min-w-[260px] border-r border-border flex flex-col h-screen">
@@ -102,6 +110,16 @@ export function Sidebar() {
           />
         ))}
       </nav>
+      <div className="p-3">
+        <button
+          type="button"
+          onClick={onLogout}
+          className="flex w-full items-center gap-2.5 px-3 py-2 rounded-md text-base transition-colors text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+        >
+          <LogOut size={17} />
+          Logout
+        </button>
+      </div>
     </aside>
   );
 }
