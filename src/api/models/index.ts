@@ -59,3 +59,4 @@ export * from './updateJobOrderLineItemDto';
 export * from './updatePurchaseOrderDto';
 export * from './updatePurchaseOrderDtoStatus';
 export * from './updatePurchaseOrderLineItemDto';
+export * from './userDto';
