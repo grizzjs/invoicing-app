@@ -24,7 +24,7 @@ import { SearchCommand } from "./search-command";
 const navItems = [
   {
     label: "Dashboard",
-    href: "/dashboard",
+    href: "/",
     icon: <LayoutDashboard size={17} />,
   },
   { label: "Customers", href: "/customers", icon: <Users size={17} /> },

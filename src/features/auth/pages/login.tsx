@@ -31,7 +31,7 @@ export default function LoginPage() {
     setSubmitting(true);
     try {
       await login({ email, password });
-      await navigate({ to: "/dashboard" });
+      await navigate({ to: "/" });
     } catch {
       setError("Invalid email or password");
     } finally {
