@@ -1,6 +1,5 @@
 import { useGetCustomers } from "@/api/endpoints/customers/customers";
 import { useCreatePurchaseOrder } from "@/api/endpoints/purchase-orders/purchase-orders";
-import { useGetFiles } from "@/api/endpoints/s3/s3";
 import { Header } from "@/components/ui/header";
 import { uploadFiles } from "@/features/common/lib/upload-files";
 import { today } from "@/lib/date-utils";

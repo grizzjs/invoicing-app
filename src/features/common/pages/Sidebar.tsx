@@ -7,6 +7,7 @@ import { Kbd } from "@/components/ui/kbd";
 import { Link } from "@tanstack/react-router";
 import {
   Archive,
+  ClipboardList,
   FileText,
   LayoutDashboard,
   SearchIcon,
@@ -28,6 +29,11 @@ const navItems = [
     label: "Purchase Orders",
     href: "/purchase-orders",
     icon: <ShoppingCart size={17} />,
+  },
+  {
+    label: "Job Orders",
+    href: "/job-orders",
+    icon: <ClipboardList size={17} />,
   },
   { label: "Deliveries", href: "/deliveries", icon: <Truck size={17} /> },
   { label: "Invoices", href: "/invoices", icon: <FileText size={17} /> },

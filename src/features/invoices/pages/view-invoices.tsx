@@ -15,7 +15,7 @@ import format from "@/lib/format-money";
 import { parseDateFromISO } from "@/lib/parse-date";
 import { Link, useParams } from "@tanstack/react-router";
 import { Printer } from "lucide-react";
-import { map, pipe, uniq } from "ramda";
+import { complement, filter, isNil, map, pipe, uniq } from "ramda";
 import { useState } from "react";
 import { HeaderActionsGroup } from "../components/header-actions-group";
 import { columns } from "../definition/line-items";
@@ -37,25 +37,44 @@ export default function ViewInvoicesPage() {
 
   const badge = entityToBadge(invoice);
 
-  const lineItems =
-    invoice.deliveryReceipts?.flatMap((delivery) => {
-      return delivery.lineItems.map((lineItem) => {
-        return {
-          name: lineItem.purchaseOrderLineItem.name,
-          description: lineItem.purchaseOrderLineItem.description,
-          quantity: lineItem.quantity,
-          unitPrice: lineItem.purchaseOrderLineItem.unitPrice,
-          amount: lineItem.quantity * lineItem.purchaseOrderLineItem.unitPrice,
-        };
-      });
-    }) || [];
+  const hasDeliveryReceipts =
+    Array.isArray(invoice.deliveryReceipts) &&
+    invoice.deliveryReceipts.length > 0;
 
-  const purchaseOrders = pipe(
-    map((delivery: DeliveryReceiptDto) => {
-      return delivery.purchaseOrder.id;
-    }),
-    uniq,
-  )(invoice.deliveryReceipts);
+  const jobOrders = invoice.jobOrders ?? [];
+
+  const lineItems = hasDeliveryReceipts
+    ? invoice.deliveryReceipts.flatMap((delivery) => {
+        return delivery.lineItems.map((lineItem) => {
+          return {
+            name: lineItem.purchaseOrderLineItem.name,
+            description: lineItem.purchaseOrderLineItem.description,
+            quantity: lineItem.quantity,
+            unitPrice: lineItem.purchaseOrderLineItem.unitPrice,
+            amount:
+              lineItem.quantity * lineItem.purchaseOrderLineItem.unitPrice,
+          };
+        });
+      })
+    : jobOrders.flatMap((jobOrder) =>
+        (jobOrder.lineItems ?? []).map((lineItem) => ({
+          name: lineItem.name,
+          description: lineItem.description,
+          quantity: lineItem.quantity,
+          unitPrice: lineItem.unitPrice,
+          amount: lineItem.quantity * lineItem.unitPrice,
+        })),
+      );
+
+  const purchaseOrders: number[] = hasDeliveryReceipts
+    ? (pipe(
+        map((delivery: DeliveryReceiptDto) => {
+          return delivery.purchaseOrder?.id;
+        }),
+        filter(complement(isNil)),
+        uniq,
+      )(invoice.deliveryReceipts) as number[])
+    : [];
 
   return (
     <main className="flex flex-1 flex-col overflow-auto gap-4">
@@ -69,30 +88,45 @@ export default function ViewInvoicesPage() {
             header="Date Created"
             value={formatDate(invoice.createDate)}
           />
-          <DetailProperty header="Purchase Order Number">
-            {purchaseOrders.map((purchaseOrder, index) => {
-              return (
-                <Link key={index} to={`/purchase-orders/${purchaseOrder}`}>
-                  <span className="underline">{purchaseOrder}</span>
-                  {index + 1 == purchaseOrders.length ? "" : ", "}
-                </Link>
-              );
-            })}
-          </DetailProperty>
+          {hasDeliveryReceipts ? (
+            <>
+              <DetailProperty header="Purchase Order Number">
+                {purchaseOrders.map((purchaseOrder, index) => {
+                  return (
+                    <Link key={index} to={`/purchase-orders/${purchaseOrder}`}>
+                      <span className="underline">{purchaseOrder}</span>
+                      {index + 1 == purchaseOrders.length ? "" : ", "}
+                    </Link>
+                  );
+                })}
+              </DetailProperty>
+              <DetailProperty header="Delivery Number/s">
+                {invoice.deliveryReceipts?.map((delivery, index) => {
+                  return (
+                    <Link key={index} to={`/deliveries/${delivery.id}`}>
+                      <span className="underline">{delivery.id}</span>
+                      {index + 1 == invoice.deliveryReceipts.length ? "" : ", "}
+                    </Link>
+                  );
+                })}
+              </DetailProperty>
+            </>
+          ) : (
+            jobOrders.length > 0 && (
+              <DetailProperty header="Job Order Number/s">
+                {jobOrders.map((jobOrder, index) => (
+                  <Link key={jobOrder.id} to={`/job-orders/${jobOrder.id}`}>
+                    <span className="underline">{jobOrder.id}</span>
+                    {index + 1 == jobOrders.length ? "" : ", "}
+                  </Link>
+                ))}
+              </DetailProperty>
+            )
+          )}
           <DetailProperty
             header="Payment Terms"
             value={`${invoice.dueInDays} days`}
           />
-          <DetailProperty header="Delivery Number/s">
-            {invoice.deliveryReceipts?.map((delivery, index) => {
-              return (
-                <Link key={index} to={`/deliveries/${delivery.id}`}>
-                  <span className="underline">{delivery.id}</span>
-                  {index + 1 == invoice.deliveryReceipts.length ? "" : ", "}
-                </Link>
-              );
-            })}
-          </DetailProperty>
           <DetailProperty
             header="Due Date"
             value={formatDate(

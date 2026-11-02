@@ -25,7 +25,6 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  Buffer,
   S3UploadDto
 } from '../../models';
 
@@ -139,6 +138,7 @@ formData.append(`file`, s3UploadDto.file);
 
       return customInstance<void>(
       {url: `/s3/${resource}/${id}`, method: 'POST',
+      headers: {'Content-Type': 'multipart/form-data', },
        data: formData, signal
     },
       );
@@ -195,8 +195,9 @@ const {mutation: mutationOptions} = options ?
 ) => {
 
 
-      return customInstance<ArrayBuffer>(
-      {url: `/s3/${resource}/${id}/${key}`, method: 'GET', responseType: 'arraybuffer', signal
+      return customInstance<Blob>(
+      {url: `/s3/${resource}/${id}/${key}`, method: 'GET',
+        responseType: 'blob', signal
     },
       );
     }
@@ -287,3 +288,60 @@ export function useDownloadFile<TData = Awaited<ReturnType<typeof downloadFile>>
 
 
 
+export const deleteFile = (
+    resource: string,
+    id: string,
+    filename: string,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<string[]>(
+      {url: `/s3/${resource}/${id}/${filename}`, method: 'DELETE', signal
+    },
+      );
+    }
+
+
+
+export const getDeleteFileMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteFile>>, TError,{resource: string;id: string;filename: string}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof deleteFile>>, TError,{resource: string;id: string;filename: string}, TContext> => {
+
+const mutationKey = ['deleteFile'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteFile>>, {resource: string;id: string;filename: string}> = (props) => {
+          const {resource,id,filename} = props ?? {};
+
+          return  deleteFile(resource,id,filename,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteFileMutationResult = NonNullable<Awaited<ReturnType<typeof deleteFile>>>
+
+    export type DeleteFileMutationError = unknown
+
+    export const useDeleteFile = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteFile>>, TError,{resource: string;id: string;filename: string}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteFile>>,
+        TError,
+        {resource: string;id: string;filename: string},
+        TContext
+      > => {
+      return useMutation(getDeleteFileMutationOptions(options), queryClient);
+    }
