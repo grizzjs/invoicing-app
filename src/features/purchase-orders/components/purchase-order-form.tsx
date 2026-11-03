@@ -1,6 +1,8 @@
 import type { CustomerDto } from "@/api/models";
 import { Button } from "@/components/ui/button";
 import { FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -19,7 +21,12 @@ import { formatDate } from "@/lib/format-date";
 import { Link } from "@tanstack/react-router";
 import { Trash2 } from "lucide-react";
 import type { DateTime } from "luxon";
+import { useState } from "react";
 import z from "zod";
+
+const VAT_RATE = 0.12;
+const addVat = (price: number) =>
+  Math.round(price * (1 + VAT_RATE) * 100) / 100;
 
 const purchaseOrderSchema = z.object({
   customer: z.object({ id: z.number() }, "Customer is required"),
@@ -85,11 +92,27 @@ export default function PurchaseOrderForm({
   onSubmit,
 }: PurchaseOrderFormProps) {
   const docs = useSupportingDocuments(existingFiles);
+  // The backend has no VAT field, so VAT-exclusive prices are converted to
+  // VAT-inclusive ones on save.
+  const [vatIncluded, setVatIncluded] = useState(true);
 
   const form = useAppForm({
     defaultValues,
-    onSubmit: ({ value }) =>
-      onSubmit(purchaseOrderSchema.parse(value), docs.getFiles()),
+    onSubmit: ({ value }) => {
+      const values = purchaseOrderSchema.parse(value);
+      return onSubmit(
+        vatIncluded
+          ? values
+          : {
+              ...values,
+              lineItems: values.lineItems.map((lineItem) => ({
+                ...lineItem,
+                unitPrice: addVat(lineItem.unitPrice),
+              })),
+            },
+        docs.getFiles(),
+      );
+    },
     validators: {
       onMount: purchaseOrderSchema,
       onChange: purchaseOrderSchema,
@@ -229,9 +252,21 @@ export default function PurchaseOrderForm({
           </FieldSet>
           <FieldSet className="grid grid-cols-1 gap-6">
             <section>
-              <h2 className="text-xs font-normal text-gray-400 mb-5">
-                Order Items
-              </h2>
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="text-xs font-normal text-gray-400">
+                  Order Items
+                </h2>
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="vat-included"
+                    checked={vatIncluded}
+                    onCheckedChange={setVatIncluded}
+                  />
+                  <Label htmlFor="vat-included">
+                    {vatIncluded ? "VAT included" : "VAT excluded"}
+                  </Label>
+                </div>
+              </div>
 
               <form.Field name="lineItems" mode="array">
                 {(field) => (
@@ -242,7 +277,11 @@ export default function PurchaseOrderForm({
                           <TableHead className="w-[20%]">Item</TableHead>
                           <TableHead className="w-[35%]">Description</TableHead>
                           <TableHead className="w-[20%]">Quantity</TableHead>
-                          <TableHead className="w-[20%]">Unit Price</TableHead>
+                          <TableHead className="w-[20%]">
+                            {vatIncluded
+                              ? "Unit Price"
+                              : "Unit Price (excl. VAT)"}
+                          </TableHead>
                           <TableHead className="w-[5%]" />
                         </TableRow>
                       </TableHeader>
@@ -372,6 +411,11 @@ export default function PurchaseOrderForm({
                   </div>
                 )}
               </form.Field>
+              {!vatIncluded && (
+                <p className="mt-3 text-xs text-muted-foreground">
+                  12% VAT will be added to each unit price when you save.
+                </p>
+              )}
             </section>
           </FieldSet>
           <FieldSet className="grid grid-cols-1 gap-4">
