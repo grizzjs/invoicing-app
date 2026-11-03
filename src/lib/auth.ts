@@ -17,11 +17,14 @@ export const clearToken = () => localStorage.removeItem(TOKEN_KEY);
 export const isAuthenticated = () => !!getToken();
 
 export async function login(credentials: LoginCredentials) {
-  const { data } = await axiosInstance.post<{ accessToken: string }>(
+  const { data } = await axiosInstance.post<{ access_token: string }>(
     "/auth/login",
     credentials,
   );
-  setToken(data.accessToken);
+  if (!data?.access_token) {
+    throw new Error("Login response did not include an access token");
+  }
+  setToken(data.access_token);
 }
 
 export const logout = () => clearToken();
